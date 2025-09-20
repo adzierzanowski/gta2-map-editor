@@ -3533,7 +3533,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [3 / 8, 1],
         [3 / 8, 1],
         [0, 0],
-        [3 / 8, 1],
+        [3 / 8, 0],
       ],
     },
     {
@@ -3545,7 +3545,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [1, 1],
         [1, 1],
         [5 / 8, 0],
-        [1, 1],
+        [1, 0],
       ],
     },
     {
@@ -3557,7 +3557,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [1, 1],
         [1, 1],
         [5 / 8, 0],
-        [1, 1],
+        [1, 0],
       ],
     },
     {
@@ -3569,7 +3569,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [3 / 8, 1],
         [3 / 8, 1],
         [0, 0],
-        [3 / 8, 1],
+        [3 / 8, 0],
       ],
     },
   ],
@@ -3596,7 +3596,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [1, 1],
         [1, 1],
         [5 / 8, 0],
-        [1, 1],
+        [1, 0],
       ],
     },
     {
@@ -3608,7 +3608,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [1, 1],
         [1, 1],
         [5 / 8, 0],
-        [1, 1],
+        [1, 0],
       ],
     },
     {
@@ -3620,7 +3620,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [3 / 8, 1],
         [3 / 8, 1],
         [0, 0],
-        [3 / 8, 1],
+        [3 / 8, 0],
       ],
     },
     {
@@ -3632,7 +3632,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [3 / 8, 1],
         [3 / 8, 1],
         [0, 0],
-        [3 / 8, 1],
+        [3 / 8, 0],
       ],
     },
   ],
@@ -3659,7 +3659,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [1, 1],
         [1, 1],
         [5 / 8, 0],
-        [1, 1],
+        [1, 0],
       ],
     },
     {
@@ -3671,7 +3671,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [3 / 8, 1],
         [3 / 8, 1],
         [0, 0],
-        [3 / 8, 1],
+        [3 / 8, 0],
       ],
     },
     {
@@ -3683,7 +3683,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [3 / 8, 1],
         [3 / 8, 1],
         [0, 0],
-        [3 / 8, 1],
+        [3 / 8, 0],
       ],
     },
     {
@@ -3695,24 +3695,12 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [1, 1],
         [1, 1],
         [5 / 8, 0],
-        [1, 1],
+        [1, 0],
       ],
     },
   ],
 
   60: [
-    // {
-    //   side: 'lid',
-    //   pts: [P, Q, S, S, Q, R],
-    //   baseUVs: [
-    //     [0, 1],
-    //     [0, 0],
-    //     [1, 1],
-    //     [1, 1],
-    //     [0, 0],
-    //     [1, 0],
-    //   ],
-    // },
     {
       side: 'lid',
       pts: [QP, Q, QS, QS, Q, QR],
@@ -3734,7 +3722,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [3 / 8, 1],
         [3 / 8, 1],
         [0, 0],
-        [3 / 8, 1],
+        [3 / 8, 0],
       ],
     },
     {
@@ -3746,7 +3734,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [3 / 8, 1],
         [3 / 8, 1],
         [0, 0],
-        [3 / 8, 1],
+        [3 / 8, 0],
       ],
     },
     {
@@ -3758,7 +3746,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [1, 1],
         [1, 1],
         [5 / 8, 0],
-        [1, 1],
+        [1, 0],
       ],
     },
     {
@@ -3770,7 +3758,7 @@ export const slopeDefs: { [key: number]: BlockFace[] } = {
         [1, 1],
         [1, 1],
         [5 / 8, 0],
-        [1, 1],
+        [1, 0],
       ],
     },
   ],
