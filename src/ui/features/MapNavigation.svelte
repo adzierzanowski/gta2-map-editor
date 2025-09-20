@@ -8,7 +8,7 @@
 
 <FloatingWindow
   title="Map Position"
-  initialRect={{ x: 530, y: 30, w: 200, h: 50 }}
+  initialRect={{ x: 570, y: 40, w: 200, h: 50 }}
 >
   <main>
     {rect.toString()}

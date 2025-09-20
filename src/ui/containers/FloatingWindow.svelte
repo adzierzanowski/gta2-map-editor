@@ -10,12 +10,13 @@
   let rect: Rect = $state(
     new Rect(initialRect ?? { x: 500, y: 500, w: 200, h: 400 }),
   )
+  let expanded: boolean = $state(true)
   let dragRect: Rect | undefined = $state()
   let dragStart: Point | undefined = $state()
 </script>
 
 <main
-  style={`top: ${rect.y}px; left: ${rect.x}px; width: ${rect.w}px; height: ${rect.h}px;`}
+  style={`top: ${rect.y}px; left: ${rect.x}px; width: ${rect.w}px; height: ${expanded ? rect.h : 24}px;`}
 >
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <nav
@@ -37,9 +38,18 @@
     }}
   >
     {title}
+    <button onclick={() => (expanded = !expanded)}>
+      {#if expanded}
+        -
+      {:else}
+        +
+      {/if}
+    </button>
   </nav>
   <section>
-    {@render children?.()}
+    {#if expanded}
+      {@render children?.()}
+    {/if}
   </section>
 </main>
 
@@ -65,6 +75,16 @@
       cursor: pointer;
       border-top-left-radius: inherit;
       border-top-right-radius: inherit;
+      justify-content: space-between;
+
+      button {
+        background-color: #282828;
+        color: #bdae93;
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     }
 
     section {

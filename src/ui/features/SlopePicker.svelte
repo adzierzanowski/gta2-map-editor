@@ -7,7 +7,7 @@
 
 <FloatingWindow
   title="Slope Picker"
-  initialRect={{ x: 20, y: 50, w: 420, h: 600 }}
+  initialRect={{ x: 10, y: 40, w: 420, h: 300 }}
 >
   <main>
     <SlopeIcon width={48} slope={0} />

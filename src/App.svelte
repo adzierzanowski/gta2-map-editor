@@ -16,12 +16,13 @@
   import MapExportModal from './ui/features/MapExportModal.svelte'
   import NewBlockWindow from './ui/features/NewBlockWindow.svelte'
 
-  let showMapLoadModal = $state(false)
+  let showMapLoadModal = $state(true)
   let showMapExportModal = $state(false)
   let map: GtaMap | undefined = $state()
   let cvs: HTMLCanvasElement
   let babylon: BabylonRenderer | undefined = $state()
-  let rect: Rect = $state(new Rect({ x: 108, y: 111, w: 32, h: 32 }))
+  // let rect: Rect = $state(new Rect({ x: 108, y: 111, w: 32, h: 32 }))
+  let rect: Rect = $state(new Rect({ x: 0, y: 0, w: 32, h: 32 }))
   let newX = $state('0')
   let newY = $state('0')
   let newZ = $state('0')

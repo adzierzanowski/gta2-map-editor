@@ -15,7 +15,7 @@
 </script>
 
 <FloatingWindow
-  initialRect={{ x: 20, y: 500, w: 100, h: 100 }}
+  initialRect={{ x: 450, y: 40, w: 100, h: 100 }}
   title="New Block"
 >
   <main>
