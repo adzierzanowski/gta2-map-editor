@@ -1,0 +1,78 @@
+import { Vector3 } from 'babylonjs'
+
+export const A = new Vector3(0, 0, 0)
+export const AB = new Vector3(3 / 8, 0, 0)
+export const AC = new Vector3(3 / 8, 0, 3 / 8)
+export const AD = new Vector3(0, 0, 3 / 8)
+
+export const B = new Vector3(1, 0, 0)
+export const BA = new Vector3(5 / 8, 0, 0)
+export const BC = new Vector3(1, 0, 3 / 8)
+export const BD = new Vector3(5 / 8, 0, 3 / 8)
+
+export const C = new Vector3(1, 0, 1)
+export const CA = new Vector3(5 / 8, 0, 5 / 8)
+export const CB = new Vector3(1, 0, 5 / 8)
+export const CD = new Vector3(5 / 8, 0, 1)
+
+export const D = new Vector3(0, 0, 1)
+export const DA = new Vector3(0, 0, 5 / 8)
+export const DB = new Vector3(3 / 8, 0, 5 / 8)
+export const DC = new Vector3(3 / 8, 0, 1)
+
+export const p = (z: number, x?: number, y?: number) =>
+  new Vector3(x ?? 0, z, y ?? 0)
+export const q = (z: number, x?: number, y?: number) =>
+  new Vector3(x ?? 1, z, y ?? 0)
+export const r = (z: number, x?: number, y?: number) =>
+  new Vector3(x ?? 1, z, y ?? 1)
+export const s = (z: number, x?: number, y?: number) =>
+  new Vector3(x ?? 0, z, y ?? 1)
+
+export const P = new Vector3(0, 1, 0)
+export const P1 = p(1 / 8)
+export const P2 = p(2 / 8)
+export const P3 = p(3 / 8)
+export const P4 = p(4 / 8)
+export const P5 = p(5 / 8)
+export const P6 = p(6 / 8)
+export const P7 = p(7 / 8)
+export const PQ = new Vector3(3 / 8, 1, 0)
+export const PR = new Vector3(3 / 8, 1, 3 / 8)
+export const PS = new Vector3(0, 1, 3 / 8)
+
+export const Q = new Vector3(1, 1, 0)
+export const Q1 = q(1 / 8)
+export const Q2 = q(2 / 8)
+export const Q3 = q(3 / 8)
+export const Q4 = q(4 / 8)
+export const Q5 = q(5 / 8)
+export const Q6 = q(6 / 8)
+export const Q7 = q(7 / 8)
+export const QP = new Vector3(5 / 8, 1, 0)
+export const QR = new Vector3(1, 1, 3 / 8)
+export const QS = new Vector3(5 / 8, 1, 3 / 8)
+
+export const R = new Vector3(1, 1, 1)
+export const R1 = r(1 / 8)
+export const R2 = r(2 / 8)
+export const R3 = r(3 / 8)
+export const R4 = r(4 / 8)
+export const R5 = r(5 / 8)
+export const R6 = r(6 / 8)
+export const R7 = r(7 / 8)
+export const RP = new Vector3(5 / 8, 1, 5 / 8)
+export const RQ = new Vector3(1, 1, 5 / 8)
+export const RS = new Vector3(5 / 8, 1, 1)
+
+export const S = new Vector3(0, 1, 1)
+export const S1 = s(1 / 8)
+export const S2 = s(2 / 8)
+export const S3 = s(3 / 8)
+export const S4 = s(4 / 8)
+export const S5 = s(5 / 8)
+export const S6 = s(6 / 8)
+export const S7 = s(7 / 8)
+export const SP = new Vector3(0, 1, 5 / 8)
+export const SQ = new Vector3(3 / 8, 1, 5 / 8)
+export const SR = new Vector3(3 / 8, 1, 1)
