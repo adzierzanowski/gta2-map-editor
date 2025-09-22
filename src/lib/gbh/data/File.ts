@@ -44,8 +44,9 @@ export class GbhFile {
   }
 
   getChunk(name: string): Chunk {
-    const chunk = this.chunks[name]
-    if (chunk === undefined) {
+    const chunk = this.chunks.get(name)
+
+    if (!chunk) {
       throw new Error('No chunk in the file')
     }
 

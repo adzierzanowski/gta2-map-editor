@@ -9,7 +9,7 @@
 
 <FloatingWindow
   title="Tile Picker"
-  initialRect={{ x: 1200, y: 530, w: 600, h: 400 }}
+  initialRect={{ x: window.innerWidth - 780, y: 40, w: 300, h: 400 }}
 >
   <main>
     {#if map}

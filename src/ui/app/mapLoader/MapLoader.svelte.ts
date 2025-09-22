@@ -1,18 +1,14 @@
-import { tick } from 'svelte'
-import { Chunk, GbhFile, type IChunkHeader } from '../../../lib/gbh'
-import {
-  BlockInfo,
-  type IBlockInfo,
-  type IColumnInfo,
-} from '../../../lib/gbh/data/Block'
+import { Chunk, type IChunkHeader } from '../../../lib/gbh'
+import { BlockInfo } from '../../../lib/gbh/data/Block'
 import { Color } from '../../../lib/gbh/data/Color'
 import type { IPaletteBase } from '../../../lib/gbh/data/GtaMap'
-import type { IPoint3D } from '../../../lib/geometry'
 import BlockWorker from './blockWorker?worker'
-import { on } from 'svelte/events'
 import { GtaMap } from './GtaMap'
 import { Palette } from './Palette'
 import type { IZoneInfo } from '../../../lib/gbh/data/Zone'
+import { DA } from './MeshPoints'
+import type { IPoint3D } from '../../../lib/geometry'
+import { Fix16 } from '../../../lib/gbh/fix16'
 
 export interface MapLoaderStageInfo {
   progress: number
@@ -22,6 +18,15 @@ export interface MapLoaderStageInfo {
   start: number
   end?: number
 }
+
+/**
+- [x] DMAP
+- [x] ZONE
+- [x] ANIM
+- [ ] MOBJ
+- [ ] LGHT
+- [ ] RGEN
+ */
 
 export class MapLoader {
   pending = $state(false)
@@ -82,6 +87,8 @@ export class MapLoader {
       this.loadBlocks(map, gmpRaw.buffer),
       this.loadTiles(map, styRaw.buffer),
       this.loadZones(map, gmpRaw.buffer),
+      this.loadAnims(map, gmpRaw.buffer),
+      this.loadLights(map, gmpRaw.buffer),
     ])
 
     const cvs = new OffscreenCanvas(32 * 64, 32 * 64)
@@ -278,6 +285,80 @@ export class MapLoader {
       map.zones.push(zone)
     }
     console.log(map.zones)
+
+    stage.end = performance.now()
+    stage.progress = 1
+    stage.stage = 'Done'
+  }
+
+  async loadAnims(map: GtaMap, buf: ArrayBufferLike) {
+    const stage: MapLoaderStageInfo = $state({
+      stage: 'Loading Animations',
+      progress: 0,
+      start: performance.now(),
+    })
+    this.stages['Anims'] = stage
+
+    const chunk = this.getChunk('ANIM', buf)
+
+    while (!chunk.eof) {
+      const base = chunk.u16()
+      const frameRate = chunk.u8()
+      const repeat = chunk.u8()
+      const length = chunk.u8()
+      chunk.u8() // unused field
+      const tiles = []
+      for (let i = 0; i < length; i++) {
+        tiles.push(chunk.u16())
+      }
+
+      map.animations.push({ base, frameRate, length, repeat, tiles })
+      stage.progress = chunk._localOffset / chunk.size
+    }
+
+    stage.end = performance.now()
+    stage.progress = 1
+    stage.stage = 'Done'
+  }
+
+  async loadLights(map: GtaMap, buf: ArrayBufferLike) {
+    const stage: MapLoaderStageInfo = $state({
+      stage: 'Loading Lights',
+      progress: 0,
+      start: performance.now(),
+    })
+    this.stages['Light'] = stage
+
+    const chunk = this.getChunk('LGHT', buf)
+
+    while (!chunk.eof) {
+      const b = chunk.u8()
+      const g = chunk.u8()
+      const r = chunk.u8()
+      const a = chunk.u8()
+      const color = new Color(r, g, b, a)
+
+      const xFix = new Fix16(chunk.u16())
+      const yFix = new Fix16(chunk.u16())
+      const zFix = new Fix16(chunk.u16())
+      const rFix = new Fix16(chunk.u16())
+
+      const pos: IPoint3D = {
+        x: xFix.asFloat(),
+        y: yFix.asFloat(),
+        z: zFix.asFloat(),
+      }
+
+      const radius = rFix.asFloat()
+      const intensity = chunk.u8()
+      const shape = chunk.u8()
+      const onTime = chunk.u8()
+      const offTime = chunk.u8()
+
+      map.lights.push({ color, intensity, offTime, onTime, pos, radius, shape })
+      stage.progress += chunk._localOffset / chunk.size
+    }
+    console.log(map.lights)
 
     stage.end = performance.now()
     stage.progress = 1

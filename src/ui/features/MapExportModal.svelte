@@ -89,9 +89,6 @@
 
     button {
       background-color: #d65d0e;
-      &.accept {
-        background-color: #98971a;
-      }
       border: 0;
 
       cursor: pointer;

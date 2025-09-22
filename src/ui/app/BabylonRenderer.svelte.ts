@@ -11,13 +11,14 @@ import {
   Mesh,
   PointerEventTypes,
   PointerInfo,
+  PointLight,
   RawTexture,
   Scene,
   StandardMaterial,
   TransformNode,
   Vector3,
 } from 'babylonjs'
-import type { IRect } from '../../lib/geometry'
+import { Point, Rect, type IRect } from '../../lib/geometry'
 import type { GtaMap } from './mapLoader/GtaMap'
 import { createMeshForBlock, createSlopePrototype } from './mapLoader/BlockMesh'
 import { slopeDefs } from './mapLoader/meshData'
@@ -39,7 +40,7 @@ export class BabylonRenderer {
     this.createSlopePrototypes()
 
     this.light = new HemisphericLight('light', new Vector3(1, 1, 1), this.scene)
-    this.light.intensity = 1.8
+    this.light.intensity = 0.2
     this.camera = new ArcRotateCamera(
       'camera',
       0,
@@ -69,6 +70,13 @@ export class BabylonRenderer {
           break
         case 'KeyI':
           this.scene.debugLayer.show()
+          break
+
+        case 'KeyQ':
+          this.light.intensity -= 0.1
+          break
+        case 'KeyE':
+          this.light.intensity += 0.1
           break
       }
     }
@@ -102,17 +110,10 @@ export class BabylonRenderer {
     texture.vOffset = 1
     texture.updateSamplingMode(1)
     material.alpha = 1
-    // material.maxSimultaneousLights = 16
+    material.maxSimultaneousLights = 16
     material.specularColor = new Color3(0.1, 0.1, 0.1)
     material.diffuseTexture = texture
     material.useAlphaFromDiffuseTexture = true
-
-    const material2 = material.clone('atlas-flat')
-    material2.diffuseTexture = texture
-    material2.backFaceCulling = false
-    material2.separateCullingPass = true
-    material2.useAlphaFromDiffuseTexture = true
-    material2.alpha = 1
   }
 
   createSlopePrototypes() {
@@ -127,11 +128,14 @@ export class BabylonRenderer {
     prototypes.setEnabled(false)
   }
 
-  async populate(map: GtaMap, rect: IRect) {
+  async populate(map: GtaMap, rect_: IRect) {
+    const rect = new Rect(rect_)
     const existing = this.scene.getTransformNodeByName('blocks')
+
     if (existing) {
       existing.name = 'existing'
     }
+
     const blocksNode = new TransformNode('blocks', this.scene)
 
     for (let y = 0; y < rect.h; y++) {
@@ -164,6 +168,34 @@ export class BabylonRenderer {
             }
           }
         }
+      }
+    }
+
+    const existingLights = this.scene.getTransformNodeByName('lights')
+    if (existingLights) {
+      existingLights.dispose()
+    }
+
+    const lights = new TransformNode('lights', this.scene)
+
+    for (const l of map.lights) {
+      if (
+        l.pos.x >= rect.x &&
+        l.pos.y >= rect.y &&
+        l.pos.x <= rect.x + rect.w &&
+        l.pos.y <= rect.y + rect.h
+      ) {
+        const light = new PointLight(
+          JSON.stringify(l.pos),
+          new Vector3(l.pos.y - rect.y, l.pos.z, l.pos.x - rect.x),
+          this.scene,
+        )
+        light.diffuse = new Color3(l.color.r, l.color.g, l.color.b)
+        light.intensity = 0.05
+        light.radius = l.radius * 2
+        light.range = l.radius * 2
+        light.parent = lights
+        light.shadowEnabled = false
       }
     }
 

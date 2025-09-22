@@ -1,4 +1,6 @@
+import type { Anim } from '../../../lib/gbh/data/Anim'
 import type { BlockInfo } from '../../../lib/gbh/data/Block'
+import type { ILight } from '../../../lib/gbh/data/Light'
 import type { IZoneInfo } from '../../../lib/gbh/data/Zone'
 import type { Palette } from './Palette'
 import TileWorker from './tileWorker?worker'
@@ -8,6 +10,8 @@ export class GtaMap {
   tiles: Map<number, ImageData> = new Map()
   zones: IZoneInfo[] = []
   palette: Palette
+  animations: Anim[] = []
+  lights: ILight[] = []
   tileAtlas = new ImageData(64 * 32, 64 * 32)
 
   private _tileWorkers: Worker[] = []

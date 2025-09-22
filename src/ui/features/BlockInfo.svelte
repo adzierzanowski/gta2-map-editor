@@ -30,30 +30,32 @@
 
 <FloatingWindow
   title="Block Info"
-  initialRect={{ x: 1200, y: 30, w: 600, h: 500 }}
+  initialRect={{ x: window.innerWidth - 450, y: 30, w: 450, h: 420 }}
 >
   {#if info}
-    <SlopeIcon slope={info.slope >> 2} width={48} />
-    <div class="ground-type">
-      <GroundTypeIcon groundType={info.slope & 3} width={48} />
-      <div class="ground-type-select">
-        <button onclick={() => onGroundTypeChange(0)}
-          ><GroundTypeIcon groundType={0} width={48} /></button
-        >
-        <button onclick={() => onGroundTypeChange(1)}
-          ><GroundTypeIcon groundType={1} width={48} /></button
-        >
-        <button onclick={() => onGroundTypeChange(2)}
-          ><GroundTypeIcon groundType={2} width={48} /></button
-        >
-        <button onclick={() => onGroundTypeChange(3)}
-          ><GroundTypeIcon groundType={3} width={48} /></button
-        >
+    <div style="display:flex; gap: 8px; align-items:center;">
+      <SlopeIcon slope={info.slope >> 2} width={48} />
+      <div class="ground-type">
+        <GroundTypeIcon groundType={info.slope & 3} width={48} />
+        <div class="ground-type-select">
+          <button onclick={() => onGroundTypeChange(0)}
+            ><GroundTypeIcon groundType={0} width={48} /></button
+          >
+          <button onclick={() => onGroundTypeChange(1)}
+            ><GroundTypeIcon groundType={1} width={48} /></button
+          >
+          <button onclick={() => onGroundTypeChange(2)}
+            ><GroundTypeIcon groundType={2} width={48} /></button
+          >
+          <button onclick={() => onGroundTypeChange(3)}
+            ><GroundTypeIcon groundType={3} width={48} /></button
+          >
+        </div>
       </div>
+      <div>slope: {blockInfo.slopeType} {blockInfo.groundType}</div>
+      <div>{selectedSide}</div>
+      <div>{info.x},{info.y},{info.z}</div>
     </div>
-    <div>slope: {blockInfo.slopeType} {blockInfo.groundType}</div>
-    <div>{selectedSide}</div>
-    <div>{info.x},{info.y},{info.z}</div>
     <div class="tile-info">
       <BlockTileInfo
         {onBlockInfoChange}
@@ -91,7 +93,6 @@
         {map}
       />
     </div>
-    <!-- {JSON.stringify(info)} -->
   {/if}
 </FloatingWindow>
 

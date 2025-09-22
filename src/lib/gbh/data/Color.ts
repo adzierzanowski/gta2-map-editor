@@ -4,12 +4,20 @@ export class Color {
   r = 0
   a = 0
 
-  constructor(data: Uint8Array) {
+  constructor(r: number, g: number, b: number, a: number) {
+    this.r = r
+    this.g = g
+    this.b = b
+    this.a = a
+  }
+
+  static fromBGRA(data: Uint8Array) {
     const dv = new DataView(data.buffer)
-    this.b = dv.getUint8(0)
-    this.g = dv.getUint8(1)
-    this.r = dv.getUint8(2)
-    this.a = dv.getUint8(3)
+    const b = dv.getUint8(0)
+    const g = dv.getUint8(1)
+    const r = dv.getUint8(2)
+    const a = dv.getUint8(3)
+    return new Color(r, g, b, a)
   }
 
   get rgba(): Uint8ClampedArray {

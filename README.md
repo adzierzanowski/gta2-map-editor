@@ -40,9 +40,9 @@ All of the chunks containing stuff like lighting, map objects, compressed blocks
 etc. are planned to be supported. I don't plan to generate PSXM data or CMAP
 but if you'd like to, you can always contribute.
 
-## Backlog
+## Status/Backlog
 
-Ordered from the most to the least urgent
+### Backlog
 
 - [ ] Easy block navigation/addition
 - [ ] Direct DMAP export
@@ -52,6 +52,42 @@ Ordered from the most to the least urgent
 - [ ] Zones
 - [ ] Map objects
 - [ ] Caching the loaded map between reloads
+
+#### GMP Support Status
+
+| chunk | import | export | desc                  |
+| ----- | ------ | ------ | --------------------- |
+| CMAP  | –      | –      | 16-bit compressed map |
+| DMAP  | yes    |        | 32-bit compressed map |
+| UMAP  |        | yes    | uncompressed map      |
+| LGHT  | yes    |        | lighting              |
+| ANIM  | yes    | broken | animations            |
+| MOBJ  |        |        | map objects           |
+| RGEN  |        |        | junction data         |
+| PSXM  | –      | –      | PlayStation mapping   |
+
+#### STY Support Status
+
+| chunk | import | export | desc                |
+| ----- | ------ | ------ | ------------------- |
+| PALX  | yes    |        | palette index       |
+| PPAL  | yes    |        | palette color data  |
+| PALB  | yes    |        | palette bases       |
+| TILE  | yes    |        | textures            |
+| SPRG  |        |        | sprite graphics     |
+| SPRX  |        |        | sprite index        |
+| SPRB  |        |        | sprite kind offsets |
+| DELS  |        |        | delta store         |
+| DELX  |        |        | delta index         |
+| FONB  |        |        | font offsets        |
+| CARI  |        |        | car info            |
+| OBJI  |        |        | map object info     |
+| PSXT  | –      | –      | PlayStation tiles   |
+| RECY  |        |        | car recycling info  |
+
+#### SCR Support Status
+
+none at the moment
 
 ## Some docs
 

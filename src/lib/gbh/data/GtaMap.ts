@@ -1,7 +1,4 @@
 import type { IBlockInfo } from './Block'
-import type { ILight } from './Light'
-import type { ITile } from './Tile'
-import type { IZoneInfo } from './Zone'
 
 export interface IPaletteBase {
   tile: number

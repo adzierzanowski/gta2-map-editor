@@ -16,20 +16,40 @@ export class MapExporter {
   stages: { [key: string]: MapExporterStageInfo } = $state({})
 
   async export(map: GtaMap) {
-    const header = new Uint8Array(6)
+    const header = await this.encodeFileHeader()
+    const umap = await this.encodeUMAP(map)
+    const zone = await this.encodeZONE(map)
+    // const anim = await this.encodeANIM(map)
 
+    const blobdata = [header, umap, zone]
+
+    return new Blob(blobdata, {
+      type: 'application/octet-stream',
+    })
+  }
+
+  async encodeFileHeader() {
+    const header = new Uint8Array(6)
     const te = new TextEncoder()
     te.encodeInto('GBMP', header)
     let dv = new DataView(header.buffer)
     dv.setUint16(4, 500, true)
+    return header
+  }
 
-    const umapHeader = new Uint8Array(8)
-    te.encodeInto('UMAP', umapHeader)
-    dv = new DataView(umapHeader.buffer)
-    dv.setUint32(4, 256 * 256 * 8 * 12, true)
+  async encodeChunk(chunkName: string, chunkData: Uint8Array) {
+    const te = new TextEncoder()
+    const chunk = new Uint8Array(8 + chunkData.byteLength)
+    te.encodeInto(chunkName, chunk)
+    const dv = new DataView(chunk.buffer)
+    dv.setUint32(4, chunkData.byteLength, true)
+    chunk.set(chunkData, 8)
+    return chunk
+  }
 
+  async encodeUMAP(map: GtaMap) {
     const umap = new Uint8Array(256 * 256 * 8 * 12)
-    dv = new DataView(umap.buffer)
+    const dv = new DataView(umap.buffer)
 
     let offset = 0
     for (let z = 0; z < 8; z++) {
@@ -49,40 +69,52 @@ export class MapExporter {
         }
       }
     }
+    return this.encodeChunk('UMAP', umap)
+  }
 
-    const zoneHeader = new Uint8Array(8)
-    te.encodeInto('ZONE', zoneHeader)
+  async encodeZONE(map: GtaMap) {
+    const size = map.zones.map(z => z.nameLength + 6).reduce((a, b) => a + b)
+    const zoneData = new Uint8Array(size)
+    const dv = new DataView(zoneData.buffer)
+    let offset = 0
 
-    const zoneData: Uint8Array[] = []
-    let zoneSize = 0
     for (const zone of map.zones) {
-      const data = new Uint8Array(6 + zone.nameLength)
-      const dv = new DataView(data.buffer)
-      dv.setUint8(0, zone.zoneType)
-      dv.setUint8(1, zone.x)
-      dv.setUint8(2, zone.y)
-      dv.setUint8(3, zone.w)
-      dv.setUint8(4, zone.h)
-      dv.setUint8(5, zone.nameLength)
-
-      let offset = 6
+      dv.setUint8(offset + 0, zone.zoneType)
+      dv.setUint8(offset + 1, zone.x)
+      dv.setUint8(offset + 2, zone.y)
+      dv.setUint8(offset + 3, zone.w)
+      dv.setUint8(offset + 4, zone.h)
+      dv.setUint8(offset + 5, zone.nameLength)
+      offset += 6
       for (const c of zone.name) {
         dv.setInt8(offset++, c.charCodeAt(0))
       }
-      zoneSize += offset
-      zoneData.push(data)
     }
+    return this.encodeChunk('ZONE', zoneData)
+  }
 
-    dv = new DataView(zoneHeader.buffer)
-    dv.setUint32(4, zoneSize, true)
+  async encodeANIM(map: GtaMap) {
+    const size = map.animations
+      .map(a => a.length * 2 + 6)
+      .reduce((a, b) => a + b)
+    const animData = new Uint8Array(size)
+    const dv = new DataView(animData.buffer)
+    let offset = 0
 
-    const blobdata = [header, umapHeader, umap, zoneHeader]
-    for (const zone of zoneData) {
-      blobdata.push(zone as Uint8Array<ArrayBuffer>)
+    for (const anim of map.animations) {
+      console.log(anim)
+      dv.setUint16(offset + 0, anim.base, true)
+      dv.setUint8(offset + 2, anim.frameRate)
+      dv.setUint8(offset + 3, anim.length)
+      dv.setUint8(offset + 4, anim.repeat)
+      offset += 6
+      for (const tile of anim.tiles) {
+        dv.setUint16(offset, tile, true)
+        offset += 2
+      }
     }
+    console.log(animData)
 
-    return new Blob(blobdata, {
-      type: 'application/octet-stream',
-    })
+    return this.encodeChunk('ANIM', animData)
   }
 }

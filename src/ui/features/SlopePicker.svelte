@@ -10,7 +10,9 @@
   initialRect={{ x: 10, y: 40, w: 420, h: 300 }}
 >
   <main>
-    <SlopeIcon width={48} slope={0} />
+    <button title="0" onclick={() => onchange?.(0)}
+      ><SlopeIcon width={48} slope={0} /></button
+    >
     <div>
       {#each new Array(8).fill(0).map((_, i) => i + 1) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}

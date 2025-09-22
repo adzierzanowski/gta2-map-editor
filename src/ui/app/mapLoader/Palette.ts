@@ -26,7 +26,7 @@ export class Palette {
     } else {
       colorData.set([0], 3)
     }
-    const color: Color = new Color(colorData)
+    const color: Color = Color.fromBGRA(colorData)
     return color
   }
 }

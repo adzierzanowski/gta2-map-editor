@@ -21,9 +21,9 @@
     }
   }
 
-  // onMount(async () => {
-  //   map = await loader.loadDefault()
-  // })
+  onMount(async () => {
+    map = await loader.loadDefault()
+  })
 </script>
 
 <Modal {show}>
