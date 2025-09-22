@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#282828" />
+  <g transform="translate(92,128)">
+    <path d="M0 0 v256 h256 v-256 h-256 l64 -64 v256 h256 v-256 h-256 m256 0 l-64 64 m0 256 l64 -64 m-256 0 l-64 64"
+      stroke="#fff" fill="none" />
+    <g fill="#fff">
+      <text x="-16" y="-8">Q</text>
+      <text x="-28" y="116">Q4</text>
+      <text x="-28" y="54">Q6</text>
+      <text x="-28" y="184">Q2</text>
+      <text x="6" y="216">Q1</text>
+      <text x="6" y="150">Q3</text>
+      <text x="6" y="85">Q5</text>
+      <text x="6" y="30">Q7</text>
+      <text x="248" y="-8">R</text>
+      <text x="308" y="-72">S</text>
+      <text x="52" y="-72">P</text>
+      <text x="159" y="-32">lid</text>
+      <text x="107" y="126">bottom</text>
+      <text x="171" y="82">top</text>
+      <text x="271" y="105">right</text>
+    </g>
+    <g transform="translate(0,256)" fill="#fff">
+      <text x="-16" y="-8">B</text>
+      <text x="241" y="-8">C</text>
+      <text x="304" y="-72">D</text>
+      <text x="50" y="-72">A</text>
+    </g>
+  </g>
+</svg>
