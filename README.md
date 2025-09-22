@@ -60,7 +60,7 @@ but if you'd like to, you can always contribute.
 | CMAP  | –      | –      | 16-bit compressed map |
 | DMAP  | yes    |        | 32-bit compressed map |
 | UMAP  |        | yes    | uncompressed map      |
-| ZONE  | yes    | yes    | 32-bit compressed map |
+| ZONE  | yes    | yes    | zone definitions      |
 | LGHT  | yes    |        | lighting              |
 | ANIM  | yes    | broken | animations            |
 | MOBJ  |        |        | map objects           |
