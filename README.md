@@ -52,6 +52,7 @@ but if you'd like to, you can always contribute.
 - [ ] Zones
 - [ ] Map objects
 - [ ] Caching the loaded map between reloads
+- [ ] Refactor interfaces in the GtaMap lib
 
 #### GMP Support Status
 
@@ -63,7 +64,7 @@ but if you'd like to, you can always contribute.
 | ZONE  | yes    | yes    | zone definitions      |
 | LGHT  | yes    |        | lighting              |
 | ANIM  | yes    | broken | animations            |
-| MOBJ  |        |        | map objects           |
+| MOBJ  | yes    |        | map objects           |
 | RGEN  |        |        | junction data         |
 | PSXM  | –      | –      | PlayStation mapping   |
 

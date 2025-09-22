@@ -7,7 +7,7 @@ import { GtaMap } from './GtaMap'
 import { Palette } from './Palette'
 import type { IZoneInfo } from '../../../lib/gbh/data/Zone'
 import { DA } from './MeshPoints'
-import type { IPoint3D } from '../../../lib/geometry'
+import type { IPoint, IPoint3D } from '../../../lib/geometry'
 import { Fix16 } from '../../../lib/gbh/fix16'
 
 export interface MapLoaderStageInfo {
@@ -81,14 +81,13 @@ export class MapLoader {
     const pal = await this.loadPalette(styRaw.buffer)
     const map = new GtaMap(pal)
 
-    // await this.loadBlocks(map, gmpRaw.buffer)
-    // await this.loadTiles(map, styRaw.buffer)
     await Promise.all([
       this.loadBlocks(map, gmpRaw.buffer),
       this.loadTiles(map, styRaw.buffer),
       this.loadZones(map, gmpRaw.buffer),
       this.loadAnims(map, gmpRaw.buffer),
       this.loadLights(map, gmpRaw.buffer),
+      this.loadObjects(map, gmpRaw.buffer),
     ])
 
     const cvs = new OffscreenCanvas(32 * 64, 32 * 64)
@@ -359,6 +358,34 @@ export class MapLoader {
       stage.progress += chunk._localOffset / chunk.size
     }
     console.log(map.lights)
+
+    stage.end = performance.now()
+    stage.progress = 1
+    stage.stage = 'Done'
+  }
+
+  async loadObjects(map: GtaMap, buf: ArrayBufferLike) {
+    const stage: MapLoaderStageInfo = $state({
+      stage: 'Loading Map Objects',
+      progress: 0,
+      start: performance.now(),
+    })
+    this.stages['Objects'] = stage
+
+    const chunk = this.getChunk('MOBJ', buf)
+
+    while (!chunk.eof) {
+      const xFix = new Fix16(chunk.u16())
+      const yFix = new Fix16(chunk.u16())
+      const angle = chunk.u8()
+      const type = chunk.u8()
+      const pos: IPoint = { x: xFix.asFloat(), y: yFix.asFloat() }
+
+      map.objects.push({ angle, pos, type })
+      stage.progress += chunk._localOffset / chunk.size
+    }
+
+    console.log(map.objects)
 
     stage.end = performance.now()
     stage.progress = 1

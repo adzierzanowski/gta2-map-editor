@@ -1,6 +1,7 @@
 import type { Anim } from '../../../lib/gbh/data/Anim'
 import type { BlockInfo } from '../../../lib/gbh/data/Block'
 import type { ILight } from '../../../lib/gbh/data/Light'
+import type { MapObject } from '../../../lib/gbh/data/MapObject'
 import type { IZoneInfo } from '../../../lib/gbh/data/Zone'
 import type { Palette } from './Palette'
 import TileWorker from './tileWorker?worker'
@@ -13,9 +14,10 @@ export class GtaMap {
   animations: Anim[] = []
   lights: ILight[] = []
   tileAtlas = new ImageData(64 * 32, 64 * 32)
+  objects: MapObject[] = []
 
   private _tileWorkers: Worker[] = []
-  private _tileWorkerPtr: number = 0
+  // private _tileWorkerPtr: number = 0
   private _tileResolvers: Map<number, (img: ImageData) => void> = new Map()
 
   constructor(palette: Palette) {
@@ -38,22 +40,22 @@ export class GtaMap {
     }
   }
 
-  async tileImage(eid: number): Promise<ImageData> {
-    const cached = this.tiles.get(eid)
-    if (cached) {
-      return cached
-    }
+  // async tileImage(eid: number): Promise<ImageData> {
+  //   const cached = this.tiles.get(eid)
+  //   if (cached) {
+  //     return cached
+  //   }
 
-    const img = this.tiles.get(eid & 0x3ff)
-    const worker = this._tileWorkers[this._tileWorkerPtr++]
-    this._tileWorkerPtr %= this._tileWorkers.length
-    if (img) {
-      return new Promise(resolve => {
-        worker.postMessage({ kind: 'render', eid, img })
-        this._tileResolvers.set(eid, resolve)
-      })
-    }
+  //   const img = this.tiles.get(eid & 0x3ff)
+  //   const worker = this._tileWorkers[this._tileWorkerPtr++]
+  //   this._tileWorkerPtr %= this._tileWorkers.length
+  //   if (img) {
+  //     return new Promise(resolve => {
+  //       worker.postMessage({ kind: 'render', eid, img })
+  //       this._tileResolvers.set(eid, resolve)
+  //     })
+  //   }
 
-    return new ImageData(64, 64)
-  }
+  //   return new ImageData(64, 64)
+  // }
 }
