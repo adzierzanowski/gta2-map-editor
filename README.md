@@ -20,7 +20,8 @@ $ npm run dev
 
 ## Does it work?
 
-Yes, the basic block editing does work although at this point it's a bit pain to
+~~Yes, the basic block editing does work~~ (it did up to b5ccc36, quite
+large refactoring was needed) although at this point it's a bit pain to
 use. The map is currently only exported in the UMAP format and doesn't include
 other chunks than UMAP and ZONE so it has to be loaded into the official DMA
 editor and exported as a compressed map so the game is able to use it.
@@ -46,27 +47,25 @@ but if you'd like to, you can always contribute.
 
 - [ ] Easy block navigation/addition
 - [ ] Direct DMAP export
-- [ ] Lighting support
-- [ ] Animations
+- [ ] Editing functions of course
 - [ ] Custom Files in the import menu
-- [ ] Zones
-- [ ] Map objects
 - [ ] Caching the loaded map between reloads
+- [ ] Optimize loading and rendering
 - [ ] Refactor interfaces in the GtaMap lib
 
 #### GMP Support Status
 
-| chunk | import | export | desc                  |
-| ----- | ------ | ------ | --------------------- |
-| CMAP  | –      | –      | 16-bit compressed map |
-| DMAP  | yes    |        | 32-bit compressed map |
-| UMAP  |        | yes    | uncompressed map      |
-| ZONE  | yes    | yes    | zone definitions      |
-| LGHT  | yes    |        | lighting              |
-| ANIM  | yes    | broken | animations            |
-| MOBJ  | yes    |        | map objects           |
-| RGEN  |        |        | junction data         |
-| PSXM  | –      | –      | PlayStation mapping   |
+| chunk | import | view    | edit    | export | desc                  |
+| ----- | ------ | ------- | ------- | ------ | --------------------- |
+| CMAP  | –      | –       | –       | –      | 16-bit compressed map |
+| DMAP  | yes    | n/a     | n/a     |        | 32-bit compressed map |
+| UMAP  |        | yes     | partial | yes    | uncompressed map      |
+| ZONE  | yes    |         |         | yes    | zone definitions      |
+| LGHT  | yes    | yes     |         |        | lighting              |
+| ANIM  | yes    |         |         | broken | animations            |
+| MOBJ  | yes    |         |         |        | map objects           |
+| RGEN  | yes    | partial |         |        | junction data         |
+| PSXM  | –      | –       | –       | –      | PlayStation mapping   |
 
 #### STY Support Status
 

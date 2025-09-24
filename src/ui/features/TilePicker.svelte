@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { GtaMap } from '../app/mapLoader/GtaMap'
-  import SlopeIcon from '../components/SlopeIcon.svelte'
-  import FloatingWindow from '../containers/FloatingWindow.svelte'
+  import type { GtaMap } from '@app/mapHandler'
+  import FloatingWindow from '@containers/FloatingWindow.svelte'
 
   let { onchange, map }: { map?: GtaMap; onchange?: (tileId: number) => void } =
     $props()
@@ -9,8 +8,7 @@
 
 <FloatingWindow
   title="Tile Picker"
-  initialRect={{ x: window.innerWidth - 780, y: 40, w: 300, h: 400 }}
->
+  initialRect={{ x: window.innerWidth - 780, y: 40, w: 300, h: 400 }}>
   <main>
     {#if map}
       <button onclick={() => onchange?.(1023)}>1023</button>
@@ -24,8 +22,7 @@
             if (ctx && map) {
               ctx.putImageData(tile, 0, 0)
             }
-          }}
-        ></canvas>
+          }}></canvas>
       {/each}
     {/if}
   </main>

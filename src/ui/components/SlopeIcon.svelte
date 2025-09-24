@@ -302,8 +302,7 @@
   viewBox="0 0 128 128"
   stroke-linecap="round"
   stroke-linejoin="round"
-  {width}
->
+  {width}>
   <g transform="translate(16,12)">
     <g>
       <!-- <path d={top} class="face top" /> -->
@@ -311,8 +310,7 @@
       <path
         d={`M${p} L${s} L${d} L${a}z M${b} L${a}`}
         fill="none"
-        class="box back"
-      />
+        class="box back" />
       <path d={right} class="face right" />
       <path d={bottom} class="face bottom" />
       <path d={lid} class="face lid" />
@@ -320,20 +318,13 @@
       <path
         d={`M${q} L${r} L${c} L${b}z M${r} L${s}z M${c} L${d} L${s}`}
         fill="none"
-        class="box front"
-      />
+        class="box front" />
     </g>
   </g>
 </svg>
 
 <style lang="scss">
   svg {
-    //    width: 32px;
-    // width: 256px;
-    // height: 256px;
-    // height: 256px;
-    // border: 1px solid #aaa;
-
     .lid {
       fill: #00f;
       stroke: #0ff;

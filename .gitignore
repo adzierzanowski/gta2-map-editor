@@ -30,3 +30,5 @@ public/*.scr
 draft.drawio
 
 image.png
+
+*.svelte_

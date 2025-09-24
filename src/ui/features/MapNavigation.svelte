@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Rect } from '../../lib/geometry'
-  import FloatingWindow from '../containers/FloatingWindow.svelte'
+  import FloatingWindow from '@containers/FloatingWindow.svelte'
+  import { Rect } from '@lib/geometry'
+
   let {
     rect = $bindable(new Rect({ x: 0, y: 0, w: 8, h: 8 })),
   }: { rect: Rect } = $props()
@@ -8,8 +9,7 @@
 
 <FloatingWindow
   title="Map Position"
-  initialRect={{ x: 570, y: 40, w: 200, h: 50 }}
->
+  initialRect={{ x: 570, y: 40, w: 200, h: 50 }}>
   <main>
     {rect.toString()}
   </main>

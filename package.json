@@ -17,7 +17,8 @@
     "svelte-check": "^4.3.1",
     "svelte-preprocess": "^6.0.3",
     "typescript": "~5.8.3",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "dependencies": {
     "babylonjs": "^8.26.0"

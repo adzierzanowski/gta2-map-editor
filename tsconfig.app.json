@@ -14,7 +14,27 @@
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+    "paths": {
+      "@lib/*": [
+        "./src/lib/*"
+      ],
+      "@app/*": [
+        "./src/ui/app/*"
+      ],
+      "@components/*": [
+        "./src/ui/components/*"
+      ],
+      "@containers/*": [
+        "./src/ui/containers/*"
+      ],
+      "@features/*": [
+        "./src/ui/features/*"
+      ],
+      "@pages/*": [
+        "./src/ui/pages/*"
+      ]
+    }
   },
   "include": [
     "src/**/*.ts",

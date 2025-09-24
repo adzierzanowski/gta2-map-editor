@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import type { GtaMap } from '../app/mapLoader/GtaMap'
-  import Progressbar from '../components/Progressbar.svelte'
-  import Modal from '../containers/Modal.svelte'
-  import { MapExporter } from '../app/mapLoader/MapExporter.svelte'
+  import { GtaMap, MapExporter } from '@app/mapHandler'
+  import Progressbar from '@components/Progressbar.svelte'
+  import Modal from '@containers/Modal.svelte'
+
   let {
     show = $bindable(),
     map = $bindable(undefined),
@@ -39,8 +38,7 @@
             {name}:{info.stage}
           </div>
           <div
-            style="display: grid; gap:16px; grid-template-columns: 80% 20%; width:100%; grid-auto-rows: auto;"
-          >
+            style="display: grid; gap:16px; grid-template-columns: 80% 20%; width:100%; grid-auto-rows: auto;">
             <div style="max-width: 80%;">
               <Progressbar value={info.progress} />
             </div>

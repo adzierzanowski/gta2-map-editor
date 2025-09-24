@@ -18,6 +18,7 @@
   .progress {
     top: 0;
     left: 0;
+    transition: width 0.2s;
     background-color: #83a598;
   }
 </style>

@@ -1,11 +1,4 @@
-export interface IPoint {
-  x: number
-  y: number
-}
-
-export interface IPoint3D extends IPoint {
-  z: number
-}
+import type { IPoint, IPoint3D } from './types'
 
 export class Point implements IPoint {
   x: number = 0
@@ -38,4 +31,8 @@ export class Point implements IPoint {
   toString() {
     return `(${this.x},${this.y})`
   }
+}
+
+export const gbhCoordsFromBabylon = (bp: IPoint3D) => {
+  return { x: bp.y, y: bp.x, z: bp.y } as IPoint3D
 }

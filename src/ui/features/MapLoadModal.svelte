@@ -1,9 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import type { GtaMap } from '../app/mapLoader/GtaMap'
-  import { MapLoader } from '../app/mapLoader/MapLoader.svelte'
-  import Progressbar from '../components/Progressbar.svelte'
-  import Modal from '../containers/Modal.svelte'
+  import { MapLoader, type GtaMap } from '@app/mapHandler'
+  import Progressbar from '@components/Progressbar.svelte'
+  import Modal from '@containers/Modal.svelte'
   let {
     show = $bindable(),
     map = $bindable(undefined),
@@ -21,8 +20,15 @@
     }
   }
 
+  $effect(() => {
+    if (!map && show) {
+      loader.loadDefault().then(map_ => (map = map_))
+    }
+  })
+
   onMount(async () => {
     map = await loader.loadDefault()
+    show = false
   })
 </script>
 
@@ -33,16 +39,13 @@
 
       {#if loaderResult === undefined}
         <button disabled={loader.pending} onclick={onLoadDefault}
-          >Load Default</button
-        >
+          >Load Default</button>
       {:else}
         <button class="accept" disabled={!loaderResult} onclick={onAccept}
-          >Cool</button
-        >
+          >Cool</button>
       {/if}
       <button disabled={loader.pending} onclick={() => (show = false)}
-        >Close</button
-      >
+        >Close</button>
     </section>
     <section id="data">
       {#each Object.entries(loader.stages) as [name, info]}
@@ -51,8 +54,7 @@
             {name}:{info.stage}
           </div>
           <div
-            style="display: grid; gap:16px; grid-template-columns: 80% 20%; width:100%; grid-auto-rows: auto;"
-          >
+            style="display: grid; gap:16px; grid-template-columns: 80% 20%; width:100%; grid-auto-rows: auto;">
             <div style="max-width: 80%;">
               <Progressbar value={info.progress} />
             </div>

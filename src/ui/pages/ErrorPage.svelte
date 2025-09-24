@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Button from '../components/Button.svelte'
-  import wasted from '../assets/wasted.png'
+  import Button from '@components/Button.svelte'
+  import wasted from '@assets/wasted.png'
 
   let {
     error = $bindable(undefined),

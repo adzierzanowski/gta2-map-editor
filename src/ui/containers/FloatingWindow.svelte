@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { helperFunctions } from 'babylonjs'
-  import { Point, Rect, type IRect } from '../../lib/geometry'
+  import { Point, Rect, type IRect } from '@lib/geometry'
+
   let {
     children,
     title,
@@ -16,8 +16,7 @@
 </script>
 
 <main
-  style={`top: ${rect.y}px; left: ${rect.x}px; width: ${rect.w}px; height: ${expanded ? rect.h : 24}px;`}
->
+  style={`top: ${rect.y}px; left: ${rect.x}px; width: ${rect.w}px; height: ${expanded ? rect.h : 24}px;`}>
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <nav
     onmousedown={e => {
@@ -35,8 +34,7 @@
         )
         rect = dragRect.translated(dragDelta)
       }
-    }}
-  >
+    }}>
     {title}
     <button onclick={() => (expanded = !expanded)}>
       {#if expanded}

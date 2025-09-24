@@ -1,93 +1,80 @@
 <script lang="ts">
-  import SlopeIcon from '../components/SlopeIcon.svelte'
-  import FloatingWindow from '../containers/FloatingWindow.svelte'
+  import SlopeIcon from '@components/SlopeIcon.svelte'
+  import FloatingWindow from '@containers/FloatingWindow.svelte'
 
   let { onchange }: { onchange?: (slope: number) => void } = $props()
 </script>
 
 <FloatingWindow
   title="Slope Picker"
-  initialRect={{ x: 10, y: 40, w: 420, h: 300 }}
->
+  initialRect={{ x: 10, y: 40, w: 420, h: 300 }}>
   <main>
     <button title="0" onclick={() => onchange?.(0)}
-      ><SlopeIcon width={48} slope={0} /></button
-    >
+      ><SlopeIcon width={48} slope={0} /></button>
     <div>
       {#each new Array(8).fill(0).map((_, i) => i + 1) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(8).fill(0).map((_, i) => i + 9) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(8).fill(0).map((_, i) => i + 17) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(8).fill(0).map((_, i) => i + 25) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(8).fill(0).map((_, i) => i + 33) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(4).fill(0).map((_, i) => i + 37) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(4).fill(0).map((_, i) => i + 41) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(4).fill(0).map((_, i) => i + 45) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(4).fill(0).map((_, i) => i + 49) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(4).fill(0).map((_, i) => i + 53) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
     <div>
       {#each new Array(5).fill(0).map((_, i) => i + 57) as i}
         <button title={i.toString()} onclick={() => onchange?.(i)}
-          ><SlopeIcon width={48} slope={i} /></button
-        >
+          ><SlopeIcon width={48} slope={i} /></button>
       {/each}
     </div>
   </main>

@@ -1,11 +1,5 @@
-import { Point, type IPoint } from './Point'
-
-export interface IRect {
-  x: number
-  y: number
-  w: number
-  h: number
-}
+import { Point } from './Point'
+import type { IPoint, IRect } from './types'
 
 export class Rect implements IRect {
   x: number
@@ -96,6 +90,15 @@ export class Rect implements IRect {
     const b = Math.min(this.y + this.h, r.y + r.h)
     const right = Math.min(this.x + this.w, r.x + r.w)
     return new Rect({ x, y, w: right - x, h: b - y })
+  }
+
+  contains(p: IPoint) {
+    return (
+      p.x >= this.x &&
+      p.x < this.x + this.w &&
+      p.y >= this.y &&
+      p.y < this.y + this.h
+    )
   }
 
   flatMap<T>(cb: (p: Point, i: number) => T) {
