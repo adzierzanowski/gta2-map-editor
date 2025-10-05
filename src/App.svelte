@@ -1,31 +1,9 @@
 <script lang="ts">
   import type { BabylonRenderer } from '@app/babylonRenderer'
   import type { GtaMap } from '@app/mapHandler'
-  import type { ISettings } from '@app/state'
-  import { Rect } from '@lib/geometry'
-  import BabylonMap from '@pages/BabylonMap.svelte'
+  import BabylonMap from '@pages/BabylonMap/BabylonMap.svelte'
   import JunctionMap from '@pages/JunctionMap.svelte'
   import MapData from '@pages/MapData.svelte'
-  import { Observable } from 'babylonjs'
-  import { setContext } from 'svelte'
-
-  let settings: ISettings = $state({
-    loadMapOnStart: true,
-    babylon: {
-      ambientLightIntensity: 0.1,
-      mapLightIntensity: 0.025,
-      mapLightRadius: 8,
-      mapLightRange: 8,
-      showArrows: false,
-      showLights: true,
-      rect: new Rect({ x: 103, y: 105, w: 32, h: 32 }),
-      rectConstraint: { x: 0, y: 0, w: 256, h: 256 },
-      zRange: [0, 7],
-      onRectChangedObservable: new Observable(undefined, true),
-    },
-  })
-
-  setContext('settings', settings)
 
   let map: GtaMap | undefined = $state()
 
@@ -78,6 +56,7 @@
       background-color: #000;
       border-bottom: 1px solid #3c3836;
       display: flex;
+      z-index: 100;
 
       button {
         &.active {

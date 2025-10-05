@@ -1,3 +1,2 @@
-export * from './BlockSpawner'
 export * from './BlockUpdater'
-export * from './LightSpawner'
+export * from './LightUpdater'

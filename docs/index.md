@@ -2,8 +2,8 @@
 
 ## Keymapping
 
+- `C` - center camera
 - `F` - focus on selected block
-- `X` - remove the selected block
 - `I` - show babylon.js debug layer
 - `WSAD` - move through the map by 1 block
 - `shift+WSAD` - move through the map by half the size of the map view

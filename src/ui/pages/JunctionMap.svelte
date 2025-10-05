@@ -1,14 +1,11 @@
 <script lang="ts">
   import type { GtaMap } from '@app/mapHandler'
-  import type { ISettings } from '@app/state'
-  import { getContext } from 'svelte'
 
   let cvs: HTMLCanvasElement
   let { map = $bindable() }: { map: GtaMap | undefined } = $props()
-  let settings: ISettings = getContext('settings')
 
   const render = () => {
-    if (cvs && map && settings) {
+    if (cvs && map) {
       const ctx = cvs.getContext('2d')
       if (ctx) {
         const w = cvs.width
@@ -65,9 +62,7 @@
   })
 
   $effect(() => {
-    if (settings) {
-      render()
-    }
+    render()
   })
 </script>
 

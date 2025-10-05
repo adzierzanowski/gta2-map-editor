@@ -1,5 +1,5 @@
 import { Point } from './Point'
-import type { IPoint, IRect } from './types'
+import type { IPoint, IPoint3D, IRect } from './types'
 
 export class Rect implements IRect {
   x: number
@@ -115,5 +115,27 @@ export class Rect implements IRect {
 
   toString() {
     return `${this.w}×${this.h}+` + this.pos.toString()
+  }
+
+  get points() {
+    const pts: Set<Point> = new Set()
+    for (let y = this.y; y < this.y + this.h; y++) {
+      for (let x = this.x; x < this.x + this.w; x++) {
+        pts.add(new Point({ x, y }))
+      }
+    }
+    return pts
+  }
+
+  points3d(zMin: number, zMax: number): Set<IPoint3D> {
+    const pts: Set<IPoint3D> = new Set()
+    for (let y = this.y; y < this.y + this.h; y++) {
+      for (let x = this.x; x < this.x + this.w; x++) {
+        for (let z = zMin; z <= zMax; z++) {
+          pts.add({ x, y, z })
+        }
+      }
+    }
+    return pts
   }
 }

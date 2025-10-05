@@ -1,6 +1,5 @@
 import type { GtaMap } from '@app/mapHandler'
-import type { ISettings } from '@app/state'
-import { BlockInfo } from '@lib/gbh'
+import { babylonCfg } from '@app/state'
 import type { IPoint3D, Rect } from '@lib/geometry'
 import {
   Engine,
@@ -28,7 +27,10 @@ import {
   createMeshForBlock,
 } from './mesh'
 import { slopeDefs } from './mesh/meshData'
-import { blockSpawner, blockUpdater, lightSpawner } from './scene'
+import { get } from 'svelte/store'
+import { updateLights } from './scene/LightUpdater'
+import { blockUpdater } from './scene'
+import { stats } from '@app/state/Stats.svelte'
 
 export class BabylonRenderer {
   engine: Engine
@@ -36,41 +38,41 @@ export class BabylonRenderer {
   camera: ArcRotateCamera
   view?: EngineView
   light: HemisphericLight
-  settings: ISettings
   map?: GtaMap
   pickedMesh?: AbstractMesh = $state()
-  pickedBlock?: BlockInfo = $derived(
-    this.pickedMesh ? new BlockInfo(this.pickedMesh.metadata) : undefined,
-  )
 
   rebuildCount: number = 0
 
+  arrowsNode: TransformNode
   blocksNode: TransformNode
   lightsNode: TransformNode
+
+  blockMeshes: Map<string, AbstractMesh | null> = new Map()
+  lightNodes: Map<IPoint3D, PointLight> = new Map()
 
   constructor(
     backCvs: HTMLCanvasElement,
     cvs: HTMLCanvasElement,
-    settings: ISettings,
     map?: GtaMap,
   ) {
-    console.log('new renderer', { backCvs, cvs, eq: backCvs === cvs })
+    console.log('new renderer')
     this.map = $derived(map)
-    this.settings = $derived(settings)
 
     this.engine = new Engine(backCvs, true)
     this.engine.inputElement = cvs
     this.scene = new Scene(this.engine)
     this.scene.clearColor = new Color4(0.04, 0.05, 0.1, 1)
 
+    this.arrowsNode = new TransformNode('arrows', this.scene)
     this.blocksNode = new TransformNode('blocks', this.scene)
     this.lightsNode = new TransformNode('lights', this.scene)
+    this.lightsNode.setEnabled(true)
 
     this.camera = new ArcRotateCamera(
       'camera',
       Math.PI * 2,
       Math.PI / 2,
-      settings.babylon.rect.w * 1.5,
+      get(babylonCfg.rect).w * 1.5,
       Vector3.Zero(),
       this.scene,
     )
@@ -84,17 +86,44 @@ export class BabylonRenderer {
       this,
     )
 
-    this.settings.babylon.onRectChangedObservable.add((rect, s) => {
+    babylonCfg.rect.subscribe(rect => {
       this.scene.onBeforeRenderObservable.runCoroutineAsync(
         this.updateScene(rect),
       )
     })
 
-    this.reattach(cvs)
-  }
+    babylonCfg.showArrows.subscribe(showArrows => {
+      this.scene.onBeforeRenderObservable.runCoroutineAsync(
+        this.updateScene(get(babylonCfg.rect)),
+      )
+    })
 
-  get cfg() {
-    return this.settings.babylon
+    babylonCfg.showLights.subscribe(showLights => {
+      this.scene.resetDrawCache()
+      this.scene.onBeforeRenderObservable.runCoroutineAsync(
+        this.updateScene(get(babylonCfg.rect)),
+      )
+    })
+
+    babylonCfg.mapLightIntensity.subscribe(intensity => {
+      const lights: PointLight[] = this.lightsNode.getChildren()
+      for (const l of lights) {
+        l.intensity = intensity
+      }
+    })
+
+    babylonCfg.mapLightRange.subscribe(range => {
+      const lights: PointLight[] = this.lightsNode.getChildren()
+      for (const l of lights) {
+        l.range = parseFloat(l.state) * range
+      }
+    })
+
+    babylonCfg.ambientLightIntensity.subscribe(
+      val => (this.light.intensity = val),
+    )
+
+    this.reattach(cvs)
   }
 
   reattach(cvs: HTMLCanvasElement) {
@@ -112,6 +141,8 @@ export class BabylonRenderer {
 
     this.camera.inputs.remove(this.camera.inputs.attached.keyboard)
     this.camera.inputs.addKeyboard()
+    this.camera.inputs.remove(this.camera.inputs.attached.pointers)
+    this.camera.inputs.addPointers()
 
     this.camera.attachControl(true)
 
@@ -126,28 +157,6 @@ export class BabylonRenderer {
   }
 
   async render() {
-    this.light.intensity = this.cfg.ambientLightIntensity
-
-    const lights = this.lightsNode.getChildren()
-    for (const l of lights) {
-      ;(l as PointLight).intensity = this.cfg.mapLightIntensity
-      ;(l as PointLight).radius = this.cfg.mapLightRadius
-      ;(l as PointLight).range = this.cfg.mapLightRange
-    }
-
-    this.lightsNode.setEnabled(true)
-
-    // if (this.cfg.showLights) {
-    //   this.lightsNode.setEnabled(true)
-    // } else {
-    //   this.lightsNode.setEnabled(false)
-    // }
-
-    const arrows = this.scene.getTransformNodeByName('arrows')
-    if (arrows) {
-      arrows.setEnabled(this.cfg.showArrows)
-    }
-
     this.scene.render()
   }
 
@@ -156,13 +165,11 @@ export class BabylonRenderer {
   }
 
   pause() {
+    this.unpickBlock()
     this.engine.stopRenderLoop()
   }
 
   async rebuild() {
-    // const start = performance.now()
-    // console.log('rebuild')
-
     await this.createAtlas()
     this.createSlopePrototypes()
 
@@ -170,18 +177,17 @@ export class BabylonRenderer {
       this.resetCamera()
     }
     this.rebuildCount++
-    // console.log('rebuild done', performance.now() - start, 'ms')
   }
 
   resetCamera() {
     this.camera.target = new Vector3(
-      this.cfg.rect.h / 2,
+      get(babylonCfg.rect).h / 2,
       4,
-      this.cfg.rect.w / 2,
+      get(babylonCfg.rect).w / 2,
     )
     this.camera.alpha = 2 * Math.PI
     this.camera.beta = Math.PI / 4
-    this.camera.radius = (this.cfg.rect.w * Math.PI) / 2
+    this.camera.radius = (get(babylonCfg.rect).w * Math.PI) / 2
   }
 
   unpickBlock() {
@@ -244,73 +250,33 @@ export class BabylonRenderer {
   }
 
   *updateScene(rect: Rect) {
-    const bs = blockSpawner(this)
-    const bu = blockUpdater(this)
-    const ls = lightSpawner(this)
+    updateLights(this, rect)
+
+    yield
+
+    this.arrowsNode.dispose()
+    this.arrowsNode = new TransformNode('arrows', this.scene)
+
+    const blockUpdateStart = performance.now()
+    const bu = blockUpdater(this, rect)
 
     for (;;) {
-      if (!rect.equals(this.cfg.rect)) return
+      let { done: buDone } = bu.next()
 
-      const { done: bsDone, value } = bs.next()
       yield
 
-      const { done: ulDone } = bu.next(value ?? undefined)
-      yield
+      if (!get(babylonCfg.rect).equals(rect)) {
+        return
+      }
 
-      const { done: lsDone } = ls.next()
-      yield
-
-      if (bsDone && ulDone && lsDone) {
+      if (buDone) {
+        stats.lastBlockUpdateTime.set(performance.now() - blockUpdateStart)
+        stats.blockMeshesCount.set(this.blockMeshes.size)
         return
       }
     }
   }
 
-  // *updateLights(rect: Rect) {
-  //   if (!this.map) {
-  //     return
-  //   }
-
-  //   if (this.cfg.showLights) {
-  //     this.lightsNode.setEnabled(true)
-
-  //     for (const l of this.map.lights) {
-  //       const lightName = 'L' + JSON.stringify(l.pos)
-  //       let lightNode = this.scene.getLightByName(lightName)
-
-  //       if (
-  //         l.pos.x >= rect.x &&
-  //         l.pos.y >= rect.y &&
-  //         l.pos.x <= rect.x + rect.w &&
-  //         l.pos.y <= rect.y + rect.h
-  //       ) {
-  //         if (!lightNode) {
-  //           lightNode = new PointLight(
-  //             lightName,
-  //             new Vector3(l.pos.y - rect.y, l.pos.z, l.pos.x - rect.x),
-  //             this.scene,
-  //           )
-  //           lightNode.diffuse = new Color3(l.color.r, l.color.g, l.color.b)
-  //           lightNode.intensity = 0.05
-  //           lightNode.radius = l.radius * 2
-  //           lightNode.range = l.radius * 2
-  //           lightNode.parent = this.lightsNode
-  //           lightNode.shadowEnabled = false
-  //           lightNode.setEnabled(true)
-  //         } else {
-  //           lightNode.setEnabled(false)
-  //         }
-  //       }
-  //     }
-  //   } else {
-  //     this.lightsNode.setEnabled(false)
-  //   }
-  // }
-
-  getBlockMesh(pos: IPoint3D) {
-    const mesh = this.scene.getMeshByName(JSON.stringify(pos))
-    return mesh
-  }
   createBlockMesh(pos: IPoint3D) {
     const blockInfo = this.map?.blocks.get(JSON.stringify(pos))
     if (!blockInfo) return
@@ -326,64 +292,6 @@ export class BabylonRenderer {
     }
     return mesh
   }
-
-  // getOrCreateBlock(pos: IPoint3D) {
-  //   return this.getBlockMesh(pos) ?? this.createBlockMesh(pos)
-  // }
-
-  //         if (blockMesh) {
-  //           blockMesh.position = new Vector3(y, z, x)
-  //           blockMesh.setParent(blocks)
-
-  //           if (this.settings.babylon.showArrows) {
-  //             const arr = this.scene.getMeshByName('arrow')
-
-  //             if (arr) {
-  //               if (block.arrows & (1 << BlockArrow.GreenLeft)) {
-  //                 const gl = arr.clone(name + '-gl', arrows)
-  //                 if (gl) {
-  //                   gl.position = blockMesh.position.add(
-  //                     new Vector3(0, 0.51, 0),
-  //                   )
-  //                 }
-  //               }
-
-  //               if (block.arrows & (1 << BlockArrow.GreenRight)) {
-  //                 const gl = arr.clone(name + '-gr', arrows)
-  //                 if (gl) {
-  //                   gl.position = blockMesh.position.add(
-  //                     new Vector3(0, 0.51, 0),
-  //                   )
-  //                   gl.rotate(Vector3.Up(), Math.PI)
-  //                 }
-  //               }
-
-  //               if (block.arrows & (1 << BlockArrow.GreenDown)) {
-  //                 const gl = arr.clone(name + '-gd', arrows)
-  //                 if (gl) {
-  //                   gl.position = blockMesh.position.add(
-  //                     new Vector3(0, 0.51, 0),
-  //                   )
-  //                   gl.rotate(Vector3.Up(), (3 * Math.PI) / 2)
-  //                 }
-  //               }
-
-  //               if (block.arrows & (1 << BlockArrow.GreenUp)) {
-  //                 const gl = arr.clone(name + '-gu', arrows)
-  //                 if (gl) {
-  //                   gl.position = blockMesh.position.add(
-  //                     new Vector3(0, 0.51, 0),
-  //                   )
-  //                   gl.rotate(Vector3.Up(), Math.PI / 2)
-  //                 }
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  // }
-  //   }
-  // }
 
   onPointer(event: PointerInfo, state: EventState) {
     if (event.type === PointerEventTypes.POINTERPICK) {
@@ -402,10 +310,7 @@ export class BabylonRenderer {
   }
 
   onKey(event: KeyboardInfo, state: EventState) {
-    // console.log({ event })
-
     if (event.type === KeyboardEventTypes.KEYDOWN) {
-      const cfg = this.cfg
       const e = event.event
       switch (e.code) {
         case 'Escape':
@@ -423,39 +328,47 @@ export class BabylonRenderer {
           break
 
         case 'KeyW':
-          cfg.rect = cfg.rect
-            .translated({
-              y: e.shiftKey ? -Math.floor(cfg.rect.h / 2) : -1,
-              x: 0,
-            })
-            .clamp(cfg.rectConstraint)
+          babylonCfg.rect.update(prev =>
+            prev
+              .translated({
+                y: e.shiftKey ? -Math.floor(prev.h / 2) : -1,
+                x: 0,
+              })
+              .clamp(get(babylonCfg.rectConstraint)),
+          )
           break
 
         case 'KeyS':
-          cfg.rect = cfg.rect
-            .translated({
-              y: e.shiftKey ? Math.floor(cfg.rect.h / 2) : 1,
-              x: 0,
-            })
-            .clamp(cfg.rectConstraint)
+          babylonCfg.rect.update(prev =>
+            prev
+              .translated({
+                y: e.shiftKey ? Math.floor(prev.h / 2) : 1,
+                x: 0,
+              })
+              .clamp(get(babylonCfg.rectConstraint)),
+          )
           break
 
         case 'KeyA':
-          cfg.rect = cfg.rect
-            .translated({
-              x: e.shiftKey ? -Math.floor(cfg.rect.h / 2) : -1,
-              y: 0,
-            })
-            .clamp(cfg.rectConstraint)
+          babylonCfg.rect.update(prev =>
+            prev
+              .translated({
+                x: e.shiftKey ? -Math.floor(prev.h / 2) : -1,
+                y: 0,
+              })
+              .clamp(get(babylonCfg.rectConstraint)),
+          )
           break
 
         case 'KeyD':
-          cfg.rect = cfg.rect
-            .translated({
-              x: e.shiftKey ? Math.floor(cfg.rect.h / 2) : 1,
-              y: 0,
-            })
-            .clamp(cfg.rectConstraint)
+          babylonCfg.rect.update(prev =>
+            prev
+              .translated({
+                x: e.shiftKey ? Math.floor(prev.h / 2) : 1,
+                y: 0,
+              })
+              .clamp(get(babylonCfg.rectConstraint)),
+          )
           break
 
         case 'KeyI':

@@ -27,7 +27,9 @@
   })
 
   onMount(async () => {
-    map = await loader.loadDefault()
+    if (!map) {
+      map = await loader.loadDefault()
+    }
     show = false
   })
 </script>

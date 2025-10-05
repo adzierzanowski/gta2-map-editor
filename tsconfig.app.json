@@ -1,7 +1,7 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "target": "es2024",
+    "target": "esnext",
     "useDefineForClassFields": true,
     "module": "ESNext",
     "resolveJsonModule": true,
@@ -33,6 +33,9 @@
       ],
       "@pages/*": [
         "./src/ui/pages/*"
+      ],
+      "@assets/*": [
+        "./src/ui/assets/*"
       ]
     }
   },

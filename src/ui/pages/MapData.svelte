@@ -1,20 +1,15 @@
 <script lang="ts">
   import type { GtaMap } from '@app/mapHandler'
-  import type { ISettings } from '@app/state'
+  import { appCfg } from '@app/state'
   import MapExportModal from '@features/MapExportModal.svelte'
   import MapLoadModal from '@features/MapLoadModal.svelte'
-  import { getContext, onMount } from 'svelte'
-
-  const settings: ISettings = getContext('settings')
 
   let { map = $bindable() }: { map: GtaMap | undefined } = $props()
 
-  let showLoadModal = $state(settings.loadMapOnStart)
-  let showExportModal = $state(false)
+  let loadMapOnStart = appCfg.loadMapOnStart
 
-  onMount(() => {
-    showLoadModal = true
-  })
+  let showLoadModal = $state($loadMapOnStart)
+  let showExportModal = $state(false)
 </script>
 
 <main>

@@ -32,3 +32,6 @@ draft.drawio
 image.png
 
 *.svelte_
+
+scraps.json
+editor-old*.png

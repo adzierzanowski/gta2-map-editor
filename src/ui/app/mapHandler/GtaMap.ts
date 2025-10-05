@@ -8,6 +8,7 @@ import type {
 } from '@lib/gbh'
 import type { Palette } from './Palette'
 import TileWorker from './tileWorker?worker'
+import { Rect, type IRect } from '@lib/geometry'
 
 export class GtaMap {
   blocks: Map<string, BlockInfo> = new Map()
@@ -25,7 +26,6 @@ export class GtaMap {
   }
 
   private _tileWorkers: Worker[] = []
-  // private _tileWorkerPtr: number = 0
   private _tileResolvers: Map<number, (img: ImageData) => void> = new Map()
 
   constructor(palette: Palette) {
@@ -48,22 +48,9 @@ export class GtaMap {
     }
   }
 
-  // async tileImage(eid: number): Promise<ImageData> {
-  //   const cached = this.tiles.get(eid)
-  //   if (cached) {
-  //     return cached
-  //   }
+  lightsForRect(rect_: IRect) {
+    const rect = new Rect(rect_)
 
-  //   const img = this.tiles.get(eid & 0x3ff)
-  //   const worker = this._tileWorkers[this._tileWorkerPtr++]
-  //   this._tileWorkerPtr %= this._tileWorkers.length
-  //   if (img) {
-  //     return new Promise(resolve => {
-  //       worker.postMessage({ kind: 'render', eid, img })
-  //       this._tileResolvers.set(eid, resolve)
-  //     })
-  //   }
-
-  //   return new ImageData(64, 64)
-  // }
+    return this.lights.filter(l => rect.contains(l.pos))
+  }
 }
