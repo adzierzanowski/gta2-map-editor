@@ -59,13 +59,17 @@
       z-index: 100;
 
       button {
+        transition: all 0.2s;
         &.active {
+          color: #000;
           background-color: #fe8019;
         }
         &:hover {
+          color: #000;
           background-color: #d65d0e;
         }
       }
+
       button,
       .dropdown {
         background-color: #7c6f64;

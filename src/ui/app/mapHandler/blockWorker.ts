@@ -1,4 +1,5 @@
 import { Chunk, type IBlockInfo, type IColumnInfo, BlockInfo } from '@lib/gbh'
+import { p3dStr } from '@lib/geometry'
 
 self.onmessage = (e: MessageEvent) => {
   if (e.data.kind === 'loadBlocks') {
@@ -54,19 +55,12 @@ const loadBlocks = (chunk_: Chunk, buf: ArrayBufferLike) => {
           self.postMessage({
             kind: 'block',
             block,
-            pos: JSON.stringify({ x, y, z }),
+            pos: p3dStr({ x, y, z }),
           })
-          self.postMessage({ kind: 'tile', eid: block.lid })
-          self.postMessage({ kind: 'tile', eid: block.top })
-          self.postMessage({ kind: 'tile', eid: block.bottom })
-          self.postMessage({ kind: 'tile', eid: block.left })
-          self.postMessage({ kind: 'tile', eid: block.right })
         }
       }
     }
-    // if (y % 64 === 0) {
     self.postMessage({ kind: 'progress', progress: y / 256 })
-    // }
   }
 
   self.postMessage({ kind: 'done' })

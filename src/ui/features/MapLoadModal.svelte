@@ -20,17 +20,11 @@
     }
   }
 
-  $effect(() => {
-    if (!map && show) {
-      loader.loadDefault().then(map_ => (map = map_))
-    }
-  })
-
   onMount(async () => {
     if (!map) {
       map = await loader.loadDefault()
+      show = false
     }
-    show = false
   })
 </script>
 

@@ -1,9 +1,8 @@
-import type { IPoint3D, Rect } from '@lib/geometry'
+import { p3dStr, type IPoint3D, type Rect } from '@lib/geometry'
 import { AbstractMesh, Vector3 } from 'babylonjs'
 import type { BabylonRenderer } from '../Renderer.svelte'
 import { babylonCfg, intricateCfg } from '@app/state'
 import { get } from 'svelte/store'
-import { S } from '../mesh/MeshPoints'
 import { BlockArrow, type IBlockInfo } from '@lib/gbh'
 
 export const blockUpdater = function* (
@@ -14,7 +13,7 @@ export const blockUpdater = function* (
     node.isEnabled(),
   )
 
-  const rectPoints = rect.points3d(0, 6)
+  const rectPoints = rect.points3d(0, 7)
   const movedMeshes: Set<string> = new Set()
   const showArrows = get(babylonCfg.showArrows)
   const blockRendererYield = get(intricateCfg.blockRendererYield)
@@ -22,7 +21,7 @@ export const blockUpdater = function* (
   let i = 0
   for (const mesh of enabledMeshes) {
     const pos: IPoint3D = mesh.metadata
-    const k = JSON.stringify(pos)
+    const k = p3dStr(pos)
     if (k in rectPoints) {
       movedMeshes.add(k)
       mesh.position = new Vector3(pos.y - rect.y, pos.z, pos.x - rect.x)
@@ -36,7 +35,7 @@ export const blockUpdater = function* (
   }
 
   for (const p of rectPoints.difference(movedMeshes)) {
-    const k = JSON.stringify(p)
+    const k = p3dStr(p)
     let mesh = rnd.blockMeshes.get(k)
     if (mesh === undefined) {
       mesh = rnd.createBlockMesh(p)

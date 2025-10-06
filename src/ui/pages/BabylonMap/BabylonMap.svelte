@@ -7,7 +7,7 @@
   import { onMount } from 'svelte'
   import NavSection from './NavSection.svelte'
   import SelSection from './SelSection.svelte'
-  import LightSection from './LightSection.svelte'
+  import LightSection from './RenderingSection.svelte'
 
   let topOffset = $state(0)
 
@@ -19,7 +19,8 @@
   let cvs: HTMLCanvasElement
   let backCvs: HTMLCanvasElement
 
-  let blockRendererYield = intricateCfg.blockRendererYield
+  let { tool } = babylonCfg
+  let { blockRendererYield } = intricateCfg
   let { lastBlockUpdateTime, blockMeshesCount } = stats
 
   $effect(() => {
@@ -49,6 +50,9 @@
   <aside
     {@attach node => {
       const onWheel = (e: WheelEvent) => {
+        if ((e.target as HTMLElement).style.position === 'absolute') {
+          return
+        }
         topOffset -= e.deltaY
         if (topOffset > 0) {
           topOffset = 0
@@ -98,8 +102,18 @@
     </section>
   </aside>
   <section>
-    <canvas bind:this={backCvs} style:display="none !important"></canvas>
-    <canvas bind:this={cvs}></canvas>
+    <nav>
+      <button
+        onclick={() => ($tool = 'nav')}
+        class={{ active: $tool === 'nav' }}>Move</button>
+      <button
+        onclick={() => ($tool = 'select')}
+        class={{ active: $tool === 'select' }}>Select</button>
+    </nav>
+    <section id="cvs-wrapper">
+      <canvas bind:this={backCvs} style:display="none !important"></canvas>
+      <canvas bind:this={cvs}></canvas>
+    </section>
   </section>
 </main>
 
@@ -130,6 +144,22 @@
     }
 
     & > section {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+
+      nav {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        button.active {
+          color: #fe8019;
+        }
+      }
+    }
+
+    #cvs-wrapper {
       position: relative;
       flex-grow: 1;
 

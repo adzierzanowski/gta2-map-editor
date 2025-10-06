@@ -10,8 +10,11 @@ import {
 } from '@lib/gbh'
 import type { IPoint3D, IPoint } from '@lib/geometry'
 import BlockWorker from './blockWorker?worker'
+import TileWorker from './tileWorker?worker'
 import { GtaMap } from './GtaMap'
 import { Palette } from './Palette'
+import { intricateCfg } from '@app/state'
+import { get } from 'svelte/store'
 
 export interface MapLoaderStageInfo {
   progress: number
@@ -26,7 +29,6 @@ export class MapLoader {
   pending = $state(false)
   chunks: Map<string, IChunkHeader> = new Map()
   stages: { [key: string]: MapLoaderStageInfo } = $state({})
-  tileEids: Set<number> = new Set()
 
   async parseHeaders(data: Uint8Array) {
     const dv = new DataView(data.buffer)
@@ -117,6 +119,7 @@ export class MapLoader {
   }
 
   async loadBlocks(map: GtaMap, buf: ArrayBufferLike) {
+    console.log('load blocks')
     const stage: MapLoaderStageInfo = $state({
       stage: 'Loading',
       progress: 0,
@@ -132,13 +135,13 @@ export class MapLoader {
           stage.progress = e.data.progress
         } else if (e.data.kind === 'block') {
           map.blocks.set(e.data.pos, new BlockInfo(e.data.block))
-        } else if (e.data.kind === 'tile') {
-          this.tileEids.add(e.data.eid)
         } else if (e.data.kind === 'done') {
+          stage.progress = 1
           stage.end = performance.now()
           stage.stage = 'Done'
 
           worker.removeEventListener('message', onMessage)
+          worker.terminate()
           resolve()
         }
       }
@@ -202,53 +205,118 @@ export class MapLoader {
   }
 
   async loadTiles(map: GtaMap, buf: ArrayBufferLike) {
+    console.log('loadtiles')
+
+    const workerCount = get(intricateCfg.tileLoadWorkers)
+
     const stage: MapLoaderStageInfo = $state({
-      stage: 'Loading Tile Data',
+      stage: 'Loading',
       progress: 0,
       start: performance.now(),
     })
     this.stages['Tiles'] = stage
 
-    const chunk = this.getChunk('TILE', buf)
-    const arr = chunk.u8arr()
-    let page = arr.subarray(0, 0x10000)
-
-    let tileId = 0
-    let offset = 0
-
-    while (offset < chunk.size) {
-      for (let y = 0; y < 4; y++) {
-        for (let x = 0; x < 4; x++) {
-          const imgData = new ImageData(64, 64)
-          const ppalId = map.palette.ppalForTile(tileId)
-
-          const tileOffset = y * 256 * 64 + x * 64
-          for (let line = 0; line < 64; line++) {
-            const lineOffset = tileOffset + line * 256
-            for (let i = 0; i < 64; i++) {
-              const x = page.subarray(lineOffset)[i]
-              const color = map.palette.colorForPpal(ppalId, x)
-              imgData.data.set(color.rgba, line * 64 * 4 + i * 4)
-            }
+    return new Promise<void>(resolve => {
+      const chunk = this.getChunk('TILE', buf)
+      const arr = chunk.u8arr()
+      const workers = Array(workerCount)
+        .fill(0)
+        .map(() => new TileWorker())
+      let tileCount = 0
+      const onMessage = (e: MessageEvent) => {
+        if (e.data.kind === 'result') {
+          const tiles: Map<number, ImageData> = e.data.tiles
+          for (const [tileId, imgData] of tiles) {
+            map.tiles.set(tileId, imgData)
+            tileCount++
           }
-          map.tiles.set(tileId, imgData)
-          tileId++
+
+          stage.progress = tileCount / 992
+
+          if (tileCount >= 992) {
+            stage.progress = 1
+            stage.stage = 'Done'
+            stage.end = performance.now()
+            for (const worker of workers) {
+              worker.removeEventListener('message', onMessage)
+              worker.terminate()
+            }
+            resolve()
+          }
         }
       }
-      stage.progress = offset / chunk.size
 
-      if (offset % 0x20000 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 0))
+      let offset = 0
+      let pageId = 0
+      for (const worker of workers) {
+        worker.addEventListener('message', onMessage)
+
+        worker.postMessage({
+          kind: 'pal',
+          ppal: map.palette.ppal,
+          palb: map.palette.palb,
+          palx: map.palette.palx,
+        })
       }
 
-      offset += 0x10000
-      page = arr.subarray(offset, offset + 0x10000)
-    }
-
-    stage.end = performance.now()
-    stage.progress = 1
-    stage.stage = 'Done'
+      while (offset < chunk.size) {
+        const page = arr.subarray(offset, offset + 0x10000)
+        const worker = workers[pageId % workers.length]
+        worker.postMessage({ kind: 'page', pageId, page })
+        pageId++
+        offset += 0x10000
+      }
+    })
   }
+
+  // async loadTiles2(map: GtaMap, buf: ArrayBufferLike) {
+  //   const stage: MapLoaderStageInfo = $state({
+  //     stage: 'Loading',
+  //     progress: 0,
+  //     start: performance.now(),
+  //   })
+  //   this.stages['Tiles'] = stage
+  //   const chunk = this.getChunk('TILE', buf)
+  //   const arr = chunk.u8arr()
+
+  //   let page = arr.subarray(0, 0x10000)
+
+  //   let tileId = 0
+  //   let offset = 0
+
+  //   while (offset < chunk.size) {
+  //     for (let y = 0; y < 4; y++) {
+  //       for (let x = 0; x < 4; x++) {
+  //         const imgData = new ImageData(64, 64)
+  //         const ppalId = map.palette.ppalForTile(tileId)
+
+  //         const tileOffset = y * 256 * 64 + x * 64
+  //         for (let line = 0; line < 64; line++) {
+  //           const lineOffset = tileOffset + line * 256
+  //           for (let i = 0; i < 64; i++) {
+  //             const x = page.subarray(lineOffset)[i]
+  //             const color = map.palette.colorForPpal(ppalId, x)
+  //             imgData.data.set(color.rgba, line * 64 * 4 + i * 4)
+  //           }
+  //         }
+  //         map.tiles.set(tileId, imgData)
+  //         tileId++
+  //       }
+  //     }
+  //     stage.progress = offset / chunk.size
+
+  //     if (offset % 0x20000 === 0) {
+  //       await new Promise(resolve => setTimeout(resolve, 0))
+  //     }
+
+  //     offset += 0x10000
+  //     page = arr.subarray(offset, offset + 0x10000)
+  //   }
+
+  //   stage.end = performance.now()
+  //   stage.progress = 1
+  //   stage.stage = 'Done'
+  // }
 
   async loadZones(map: GtaMap, buf: ArrayBufferLike) {
     const stage: MapLoaderStageInfo = $state({

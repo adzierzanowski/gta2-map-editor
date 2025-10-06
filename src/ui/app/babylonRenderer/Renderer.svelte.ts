@@ -1,6 +1,6 @@
 import type { GtaMap } from '@app/mapHandler'
-import { babylonCfg } from '@app/state'
-import type { IPoint3D, Rect } from '@lib/geometry'
+import { babylonCfg, intricateCfg } from '@app/state'
+import { p3dStr, type IPoint3D, type Rect } from '@lib/geometry'
 import {
   Engine,
   Scene,
@@ -20,6 +20,11 @@ import {
   PointerEventTypes,
   KeyboardInfo,
   KeyboardEventTypes,
+  MotionBlurPostProcess,
+  LinesMesh,
+  Mesh,
+  MeshBuilder,
+  BoundingInfo,
 } from 'babylonjs'
 import {
   createSlopePrototype,
@@ -31,6 +36,11 @@ import { get } from 'svelte/store'
 import { updateLights } from './scene/LightUpdater'
 import { blockUpdater } from './scene'
 import { stats } from '@app/state/Stats.svelte'
+import { Box } from '@lib/geometry/Box'
+import { SelectionTool } from './tools/SelectionTool.svelte'
+import type { BabylonToolName } from './tools/types'
+import { NavTool } from './tools/NavTool.svelte'
+import type { BabylonTool } from './tools/BabylonTool.svelte'
 
 export class BabylonRenderer {
   engine: Engine
@@ -43,12 +53,18 @@ export class BabylonRenderer {
 
   rebuildCount: number = 0
 
+  mb: MotionBlurPostProcess
+
   arrowsNode: TransformNode
   blocksNode: TransformNode
   lightsNode: TransformNode
 
   blockMeshes: Map<string, AbstractMesh | null> = new Map()
   lightNodes: Map<IPoint3D, PointLight> = new Map()
+
+  navTool: NavTool
+  selectionTool: SelectionTool
+  currentTool?: BabylonTool = $state()
 
   constructor(
     backCvs: HTMLCanvasElement,
@@ -60,10 +76,13 @@ export class BabylonRenderer {
 
     this.engine = new Engine(backCvs, true)
     this.engine.inputElement = cvs
+
     this.scene = new Scene(this.engine)
     this.scene.clearColor = new Color4(0.04, 0.05, 0.1, 1)
+    this.scene.shadowsEnabled = true
 
     this.arrowsNode = new TransformNode('arrows', this.scene)
+
     this.blocksNode = new TransformNode('blocks', this.scene)
     this.lightsNode = new TransformNode('lights', this.scene)
     this.lightsNode.setEnabled(true)
@@ -76,7 +95,21 @@ export class BabylonRenderer {
       Vector3.Zero(),
       this.scene,
     )
+    this.camera.upperRadiusLimit = 128
+    this.camera.lowerRadiusLimit = 0.1
+    this.camera.upperBetaLimit = Math.PI / 2
+
+    this.mb = new MotionBlurPostProcess(
+      'motionblur',
+      this.scene,
+      {},
+      this.camera,
+    )
+    this.mb.isObjectBased = false
+    this.mb.motionStrength = 4
+
     this.light = new HemisphericLight('light', new Vector3(1, 1, 1), this.scene)
+    this.light.shadowEnabled = true
 
     this.scene.onKeyboardObservable.add(this.onKey, undefined, undefined, this)
     this.scene.onPointerObservable.add(
@@ -85,6 +118,10 @@ export class BabylonRenderer {
       undefined,
       this,
     )
+
+    this.navTool = new NavTool(this)
+    this.selectionTool = new SelectionTool(this)
+    this.currentTool = this.navTool
 
     babylonCfg.rect.subscribe(rect => {
       this.scene.onBeforeRenderObservable.runCoroutineAsync(
@@ -119,9 +156,42 @@ export class BabylonRenderer {
       }
     })
 
+    babylonCfg.materialAlpha.subscribe(a => {
+      const material = this.scene.getMaterialByName('atlas')
+      if (material) {
+        material.alpha = a
+      }
+    })
+
     babylonCfg.ambientLightIntensity.subscribe(
       val => (this.light.intensity = val),
     )
+
+    babylonCfg.motionBlurStrength.subscribe(val => {
+      this.mb.motionStrength = val
+    })
+
+    babylonCfg.maxSimLights.subscribe(n => {
+      const material = this.scene.getMaterialByName('atlas')
+      if (material) {
+        ;(material as StandardMaterial).maxSimultaneousLights = n
+      }
+    })
+
+    babylonCfg.tool.subscribe(tool => {
+      this.currentTool?.onDeactivate()
+
+      switch (tool) {
+        case 'nav':
+          this.currentTool = this.navTool
+          break
+        case 'select':
+          this.currentTool = this.selectionTool
+          break
+      }
+
+      this.currentTool.onActivate()
+    })
 
     this.reattach(cvs)
   }
@@ -206,23 +276,28 @@ export class BabylonRenderer {
     }
 
     const material = new StandardMaterial('atlas', this.scene)
+    // const normTexture = new Texture('/stenorm.png', this.scene)
     const texture = new RawTexture(
       this.map.tileAtlas.data,
       64 * 32,
       64 * 32,
       Engine.TEXTUREFORMAT_RGBA,
       this.scene,
+      false,
     )
     texture.hasAlpha = true
     texture.vScale = -1
     texture.vOffset = 1
     texture.updateSamplingMode(1)
+    texture.displayName = 'atlas'
+
     material.alpha = 1
-    material.maxSimultaneousLights = 32
+    material.maxSimultaneousLights = get(babylonCfg.maxSimLights)
     material.specularColor = new Color3(0.1, 0.1, 0.1)
     material.diffuseTexture = texture
+    // material.bumpTexture = normTexture
     material.useAlphaFromDiffuseTexture = true
-    material.freeze()
+    // material.freeze()
   }
 
   createSlopePrototypes() {
@@ -251,7 +326,6 @@ export class BabylonRenderer {
 
   *updateScene(rect: Rect) {
     updateLights(this, rect)
-
     yield
 
     this.arrowsNode.dispose()
@@ -278,15 +352,10 @@ export class BabylonRenderer {
   }
 
   createBlockMesh(pos: IPoint3D) {
-    const blockInfo = this.map?.blocks.get(JSON.stringify(pos))
+    const blockInfo = this.map?.blocks.get(p3dStr(pos))
     if (!blockInfo) return
     if (blockInfo.empty) return
-    const mesh = createMeshForBlock(
-      JSON.stringify(pos),
-      pos,
-      blockInfo,
-      this.scene,
-    )
+    const mesh = createMeshForBlock(p3dStr(pos), pos, blockInfo, this.scene)
     if (mesh) {
       mesh.setParent(this.blocksNode)
     }
@@ -312,6 +381,19 @@ export class BabylonRenderer {
   onKey(event: KeyboardInfo, state: EventState) {
     if (event.type === KeyboardEventTypes.KEYDOWN) {
       const e = event.event
+
+      const tool = get(babylonCfg.tool)
+
+      let handled = false
+
+      if (tool === 'select') {
+        handled = this.selectionTool.onKey(event, state)
+      }
+
+      if (handled) {
+        return
+      }
+
       switch (e.code) {
         case 'Escape':
           this.unpickBlock()
@@ -376,6 +458,25 @@ export class BabylonRenderer {
           this.scene.debugLayer.hide()
           if (!visible) {
             this.scene.debugLayer.show()
+          }
+          break
+
+        case 'KeyV':
+          if (this.pickedMesh) {
+            const pickedPos = this.pickedMesh.position
+
+            babylonCfg.tool.set('select')
+            const sel = get(babylonCfg.selection)
+
+            if (sel) {
+            } else {
+              babylonCfg.selection.set(
+                new Box(
+                  { x: pickedPos.x, y: pickedPos.y, z: pickedPos.z },
+                  { x: pickedPos.x, y: pickedPos.y, z: pickedPos.z },
+                ),
+              )
+            }
           }
           break
       }

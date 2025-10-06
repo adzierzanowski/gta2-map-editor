@@ -76,7 +76,6 @@ export const createMeshForBlock = (
     return
   }
 
-  // const name = `block-${pos.x}-${pos.y}-${pos.z}`
   const mesh = proto.clone(name, {})
   mesh.makeGeometryUnique()
 
@@ -161,5 +160,3 @@ export const transformUvs = (
     return p
   })
 }
-
-export const createArrowsForBlock = async () => {}

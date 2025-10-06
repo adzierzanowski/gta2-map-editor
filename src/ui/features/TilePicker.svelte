@@ -8,7 +8,7 @@
 
 <FloatingWindow
   title="Tile Picker"
-  initialRect={{ x: window.innerWidth - 780, y: 40, w: 300, h: 400 }}>
+  initialRect={{ x: 80, y: 0, w: 300, h: 400 }}>
   <main>
     {#if map}
       <button onclick={() => onchange?.(1023)}>1023</button>

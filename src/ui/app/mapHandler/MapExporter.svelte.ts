@@ -1,5 +1,6 @@
 import type { IChunkHeader } from '@lib/gbh'
 import type { GtaMap } from './GtaMap'
+import { p3dStr } from '@lib/geometry'
 
 export interface MapExporterStageInfo {
   progress: number
@@ -55,7 +56,7 @@ export class MapExporter {
     for (let z = 0; z < 8; z++) {
       for (let y = 0; y < 256; y++) {
         for (let x = 0; x < 256; x++) {
-          const block = map.blocks.get(JSON.stringify({ x, y, z }))
+          const block = map.blocks.get(p3dStr({ x, y, z }))
           if (block) {
             dv.setUint16(offset, block.left, true)
             dv.setUint16(offset + 2, block.right, true)

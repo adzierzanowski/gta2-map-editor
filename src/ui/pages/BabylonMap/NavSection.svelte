@@ -13,7 +13,7 @@
   let h = $state($rect.h)
 </script>
 
-<SideSection title="Navigation">
+<SideSection title="Navigation" expandedInitial={true}>
   <!-- <div> -->
 
   <!-- {$rect.toString()} -->

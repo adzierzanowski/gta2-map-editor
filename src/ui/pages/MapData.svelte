@@ -1,28 +1,85 @@
 <script lang="ts">
-  import type { GtaMap } from '@app/mapHandler'
+  import { MapLoader, type GtaMap } from '@app/mapHandler'
   import { appCfg } from '@app/state'
+  import Progressbar from '@components/Progressbar.svelte'
   import MapExportModal from '@features/MapExportModal.svelte'
-  import MapLoadModal from '@features/MapLoadModal.svelte'
+  import { onMount } from 'svelte'
 
   let { map = $bindable() }: { map: GtaMap | undefined } = $props()
 
-  let loadMapOnStart = appCfg.loadMapOnStart
+  let { loadMapOnStart } = appCfg
 
-  let showLoadModal = $state($loadMapOnStart)
   let showExportModal = $state(false)
+  let tileAtlasURL = $state('')
+  let loader = $state(new MapLoader())
+  let pending = $state(false)
+
+  const loadDefault = async () => {
+    pending = true
+
+    map = await loader.loadDefault()
+    pending = false
+  }
+
+  onMount(async () => {
+    if ($loadMapOnStart) {
+      if (!map) {
+        await loadDefault()
+      }
+    }
+  })
 </script>
 
 <main>
   <aside>
     <h1>Map</h1>
-    <button onclick={() => (showLoadModal = true)}>Load Map</button>
+    <button onclick={loadDefault} disabled={pending}>Load Map</button>
 
     <button
-      disabled={map === undefined}
+      disabled={map === undefined || pending}
       onclick={() => (showExportModal = true)}>Export Map</button>
-    <MapLoadModal bind:map show={showLoadModal} />
-    <MapExportModal bind:map show={showExportModal} />
+    <MapExportModal bind:map bind:show={showExportModal} />
+
+    <button
+      disabled={map === undefined || pending}
+      onclick={() => {
+        const cvs = new OffscreenCanvas(
+          map!.tileAtlas.width,
+          map!.tileAtlas.height,
+        )
+        const ctx = cvs.getContext('2d')
+
+        if (ctx) {
+          ctx.putImageData(map!.tileAtlas, 0, 0)
+          cvs.convertToBlob().then(blob => {
+            tileAtlasURL = URL.createObjectURL(blob)
+          })
+        }
+      }}>Export Texture Atlas</button>
   </aside>
+  <section id="data">
+    {#each Object.entries(loader.stages) as [name, info]}
+      <div>
+        <div>
+          {name}: {info.stage}
+        </div>
+        <div
+          style="display: grid; gap:16px; grid-template-columns: 80% 20%; width:100%; grid-auto-rows: auto;">
+          <div style="max-width: 80%;">
+            <Progressbar value={info.progress} />
+          </div>
+          <div>
+            {#if info.end}
+              {(info.end - info.start).toFixed(0)} ms
+            {:else}
+              {(info.progress * 100).toFixed(0)}%
+            {/if}
+          </div>
+        </div>
+        <div>{info.details}</div>
+      </div>
+    {/each}
+  </section>
   <section>
     {#if map}
       <h2>Current Map</h2>
@@ -47,6 +104,9 @@
       <div>
         {map.junctions.junctions.length} junctions
       </div>
+      <div>
+        <a href={tileAtlasURL} download>{tileAtlasURL}</a>
+      </div>
     {:else}
       No map is currently loaded
     {/if}
@@ -61,6 +121,9 @@
     height: 100%;
 
     aside {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
       padding: 20px;
     }
 

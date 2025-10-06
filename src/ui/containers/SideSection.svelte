@@ -1,9 +1,10 @@
 <script lang="ts">
   let {
-    expanded = $bindable(true),
+    expandedInitial,
     children,
     title,
-  }: { expanded?: boolean; children?: any; title: string } = $props()
+  }: { expandedInitial?: boolean; children?: any; title: string } = $props()
+  let expanded = $state(expandedInitial ?? false)
 </script>
 
 <main>

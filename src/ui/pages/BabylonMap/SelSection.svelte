@@ -19,6 +19,7 @@
   )
   let rect = babylonCfg.rect
 
+  let showTilePicker = $state(false)
   let showGroundTypePicker = $state(false)
   let showSlopePicker = $state(false)
   let selectedSide: BlockSide = $state('lid')
@@ -27,60 +28,69 @@
     if (pickedBlock || pickedMesh) {
       showSlopePicker = false
       showGroundTypePicker = false
+      showTilePicker = false
     }
   })
 </script>
 
-<SideSection title="Selection">
-  <div class="info">
-    {#if pickedMesh}
-      {@const p: IPoint3D = gbhCoordsFromBabylon(pickedMesh.position)}
-      {@const r = $rect}
-      <Coords x={p.x + r.x} y={p.y + r.y} z={p.z} />
-      {#if pickedBlock}
-        <div class="ground-type">
-          <button
-            class="picker-btn"
-            onclick={() => (showGroundTypePicker = !showGroundTypePicker)}>
-            <GroundTypeIcon width={32} groundType={pickedBlock.slope & 3} />
-            {pickedBlock.groundType?.toString()}
-          </button>
+<SideSection title="Selection" expandedInitial={true}>
+  <main>
+    <div class="info">
+      {#if pickedMesh}
+        {@const p: IPoint3D = gbhCoordsFromBabylon(pickedMesh.position)}
+        {@const r = $rect}
+        <Coords x={p.x + r.x} y={p.y + r.y} z={p.z} />
+        {#if pickedBlock}
+          <div class="ground-type">
+            <button
+              class="picker-btn"
+              onclick={() => (showGroundTypePicker = !showGroundTypePicker)}>
+              <GroundTypeIcon width={32} groundType={pickedBlock.slope & 3} />
+              {pickedBlock.groundType?.toString()}
+            </button>
 
-          {#if showGroundTypePicker}
-            <GroundTypePicker />
-          {/if}
-        </div>
+            {#if showGroundTypePicker}
+              <GroundTypePicker />
+            {/if}
+          </div>
 
-        <div class="slope">
-          <button
-            class="picker-btn"
-            onclick={() => (showSlopePicker = !showSlopePicker)}>
-            <SlopeIcon slope={pickedBlock.slopeType} width={32} />
-            {pickedBlock.slopeType}
-          </button>
-          {#if showSlopePicker}
-            <SlopePicker
-              onchange={slope => {
-                showSlopePicker = false
-              }} />
-          {/if}
-        </div>
+          <div class="slope">
+            <button
+              class="picker-btn"
+              onclick={() => (showSlopePicker = !showSlopePicker)}>
+              <SlopeIcon slope={pickedBlock.slopeType} width={32} />
+              {pickedBlock.slopeType}
+            </button>
+            {#if showSlopePicker}
+              <SlopePicker
+                onchange={slope => {
+                  showSlopePicker = false
+                }} />
+            {/if}
+          </div>
+        {/if}
       {/if}
-    {/if}
-  </div>
+    </div>
 
-  <div>
-    {#if pickedMesh && pickedBlock}
-      <BlockTileView
-        info={pickedBlock}
-        {map}
-        bind:selectedSide
-        onBlockInfoChange={() => {}}></BlockTileView>
-    {/if}
-  </div>
+    <div>
+      {#if pickedMesh && pickedBlock}
+        <BlockTileView
+          info={pickedBlock}
+          {map}
+          bind:selectedSide
+          bind:showPicker={showTilePicker}
+          onBlockInfoChange={() => {}}></BlockTileView>
+      {/if}
+    </div>
+  </main>
 </SideSection>
 
 <style lang="scss">
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
   .info {
     display: flex;
     flex-direction: row;

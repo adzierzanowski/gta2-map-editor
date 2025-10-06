@@ -7,7 +7,7 @@ import type {
   IJunctions,
 } from '@lib/gbh'
 import type { Palette } from './Palette'
-import TileWorker from './tileWorker?worker'
+// import TileWorker from './tileWorker?worker'
 import { Rect, type IRect } from '@lib/geometry'
 
 export class GtaMap {
@@ -25,27 +25,27 @@ export class GtaMap {
     hSegments: [],
   }
 
-  private _tileWorkers: Worker[] = []
-  private _tileResolvers: Map<number, (img: ImageData) => void> = new Map()
+  // private _tileWorkers: Worker[] = []
+  // private _tileResolvers: Map<number, (img: ImageData) => void> = new Map()
 
   constructor(palette: Palette) {
     this.palette = palette
-    for (let i = 0; i < 8; i++) {
-      const worker = new TileWorker()
-      this._tileWorkers.push(worker)
-      worker.addEventListener('message', e => {
-        switch (e.data.kind) {
-          case 'result':
-            const resolver = this._tileResolvers.get(e.data.eid)
-            if (resolver) {
-              resolver(e.data.img)
-              this.tiles.set(e.data.eid, e.data.img)
-              this._tileResolvers.delete(e.data.eid)
-            }
-            break
-        }
-      })
-    }
+    // for (let i = 0; i < 8; i++) {
+    //   const worker = new TileWorker()
+    //   this._tileWorkers.push(worker)
+    //   worker.addEventListener('message', e => {
+    //     switch (e.data.kind) {
+    //       case 'result':
+    //         const resolver = this._tileResolvers.get(e.data.eid)
+    //         if (resolver) {
+    //           resolver(e.data.img)
+    //           this.tiles.set(e.data.eid, e.data.img)
+    //           this._tileResolvers.delete(e.data.eid)
+    //         }
+    //         break
+    //     }
+    //   })
+    // }
   }
 
   lightsForRect(rect_: IRect) {

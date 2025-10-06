@@ -26,7 +26,6 @@ body {
 }
 
 fieldset {
-  margin: 10px;
   border: 1px solid #504945;
   display: flex;
 
@@ -45,9 +44,10 @@ fieldset {
         height: 16px;
         border-radius: 4px;
         appearance: none;
-        background-color: #83a598;
+        background-color: #45858880;
         cursor: pointer;
       }
+
       &::-moz-range-thumb {
         content: ' ';
         width: 6px;
@@ -56,6 +56,12 @@ fieldset {
         appearance: none;
         background-color: #83a598;
         cursor: pointer;
+      }
+
+      &:hover {
+        &::-webkit-slider-thumb {
+          background-color: #83a598;
+        }
       }
     }
   }
@@ -68,8 +74,17 @@ fieldset {
     justify-content: space-between;
     align-items: center;
     padding: 0 8px;
+    color: #7c6f64;
+
+    transition: color 0.2s;
 
     span {
+      color: #83a598;
+    }
+  }
+
+  &:hover {
+    legend {
       color: #83a598;
     }
   }

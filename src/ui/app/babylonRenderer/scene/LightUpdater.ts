@@ -2,7 +2,7 @@ import { Color3, PointLight, TransformNode, Vector3 } from 'babylonjs'
 import type { BabylonRenderer } from '../Renderer.svelte'
 import { get } from 'svelte/store'
 import { babylonCfg } from '@app/state'
-import type { IRect } from '@lib/geometry'
+import { p3dStr, type IRect } from '@lib/geometry'
 
 export const updateLights = (rnd: BabylonRenderer, rect: IRect) => {
   rnd.lightsNode.dispose()
@@ -15,7 +15,7 @@ export const updateLights = (rnd: BabylonRenderer, rect: IRect) => {
 
     for (const l of lights) {
       const light = new PointLight(
-        `L${JSON.stringify(l.pos)}`,
+        `L${p3dStr(l.pos)}`,
         new Vector3(0, 0, 0),
         rnd.scene,
       )
